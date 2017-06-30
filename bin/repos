@@ -7,6 +7,7 @@ import sys
 
 from changes.config import create_app, db
 from changes.db.utils import create_or_update
+from changes.jobs.import_repo import import_repo
 from changes.jobs.sync_repo import sync
 from changes.models.option import ItemOption
 from changes.models.repository import Repository, RepositoryBackend, RepositoryStatus
@@ -120,6 +121,10 @@ elif args.command == 'edit':
         repo.status = RepositoryStatus.active
 
     db.session.add(repo)
+    import_repo.delay(
+        repo_id=repo.id.hex,
+        task_id=repo.id.hex,
+    )
 
     print("Saved repo with ID {%s}" % (
         repo.id,
