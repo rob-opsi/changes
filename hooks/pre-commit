@@ -31,7 +31,7 @@ def py_lint(files_modified):
 
 def js_lint(files_modified):
     has_errors = False
-    if os.system('node_modules/.bin/jshint static/'):
+    if os.system('node_modules/.bin/eslint static/'):
         has_errors = True
 
     return has_errors

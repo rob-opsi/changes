@@ -4,9 +4,6 @@
   "env": {
     "browser": true,
   },
-  "ecmaFeatures": {
-    "jsx": true
-  },
   "plugins": [
     // eslint out of the box doesn't quite work properly with react (the
     // no-unused-vars rule is broken.) We mainly need the plugin to fix

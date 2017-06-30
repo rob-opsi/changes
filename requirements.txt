@@ -32,5 +32,5 @@ statprof
 statsd==3.0.1
 toronado==0.0.4
 typing==3.5.2.2
-uwsgi==2.0.10
+uwsgi==2.0.15
 ipython==3.1.0

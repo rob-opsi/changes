@@ -36,15 +36,15 @@ class _Celery(object):
         if celery.conf.CELERY_ALWAYS_EAGER:
             task_id = uuid4()
             # we dont call out to delay() as it causes db rollbacks/etc
-            celery.tasks[name].run(*args or (), **kwargs or {})
+            celery.tasks[name].delay(*args or (), **kwargs or {})
         else:
-            with celery.producer_or_acquire() as P:
-                task_id = P.publish_task(
-                    task_name=name,
-                    task_args=args,
-                    task_kwargs=kwargs,
-                    *fn_args, **fn_kwargs
-                )
+            task_id = self.celery.send_task(
+                name,
+                args,
+                kwargs,
+                *fn_args,
+                **fn_kwargs
+            )
         return task_id
 
     def retry(self, name, *args, **kwargs):

@@ -27,17 +27,14 @@ tests_require = [
 
 install_requires = [
     'amqp>=1.4.2,<2.0.0',
-    'alembic>=0.6.4,<0.7.0',
+    'alembic>=0.9.2,<1.0.0',
     'anyjson>=0.3.3,<0.4.0',
     'argparse>=1.2.1,<1.3.0',
     'blinker>=1.3,<1.4',
     'boto>=2.25.0,<2.26.0',
-    # celery 3.1.9 breaks TrackedTask (wraps is incorrect)
-    'celery==3.1.8',
+    'celery==4.0.2',
     'cryptography==1.2',
-    # Kombu 3.0.25 has undocumented dependency on a newer version of redis that breaks
-    # us, so we keep with 3.0.24 until that is resolved.
-    'kombu>=3.0.8,<=3.0.24',
+    'kombu==4.0.2',
     'enum34==1.1.2',
     'flask>=0.10.1,<0.11.0',
     'flask-assets>=0.10,<0.11',
@@ -48,19 +45,19 @@ install_requires = [
     'lxml>=3.2.3,<3.3.0',
     'kazoo==2.2.1',
     'raven>=5.27.1,<5.28.0',
-    'redis>=2.10.3,<2.10.4',
+    'redis>=2.10.5,<2.11.0',
     'requests>=2.3.0,<2.4.0',
     'oauth2client>=1.2,<1.3',
     'psycopg2>=2.5.1,<2.6.0',
     'python-dateutil>=2.1,<2.2',
     'PyYAML>=3.11',
     'simplejson>=3.3.0,<3.4.0',
-    'sqlalchemy==1.0.13',
+    'sqlalchemy==1.1.11',
     'statprof',
     'statsd==3.0.1',
     'toronado==0.0.4',
     'typing==3.5.2.2',
-    'uwsgi==2.0.10',
+    'uwsgi==2.0.15',
     'ipython==3.1.0',
 ]
 
