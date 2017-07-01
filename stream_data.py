@@ -79,9 +79,12 @@ def create_new_build(change, source, patch, project):
     )
 
     db.session.add(ItemStat(item_id=build.id, name='lines_covered', value='5'))
-    db.session.add(ItemStat(item_id=build.id, name='lines_uncovered', value='5'))
-    db.session.add(ItemStat(item_id=build.id, name='diff_lines_covered', value='5'))
-    db.session.add(ItemStat(item_id=build.id, name='diff_lines_uncovered', value='5'))
+    db.session.add(ItemStat(item_id=build.id,
+                            name='lines_uncovered', value='5'))
+    db.session.add(ItemStat(item_id=build.id,
+                            name='diff_lines_covered', value='5'))
+    db.session.add(ItemStat(item_id=build.id,
+                            name='diff_lines_uncovered', value='5'))
 
     db.session.commit()
 
@@ -151,7 +154,8 @@ def update_existing_entry(project):
         test_results = []
         for _ in xrange(10):
             if job.result == Result.failed:
-                result = Result.failed if random.randint(0, 3) == 1 else Result.passed
+                result = Result.failed if random.randint(
+                    0, 3) == 1 else Result.passed
             else:
                 result = Result.passed
             test_results.append(mock.test_result(jobstep, result=result))

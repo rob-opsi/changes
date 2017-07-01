@@ -29,7 +29,7 @@ from changes.models.project import Project
 from changes.models.repository import Repository
 from changes.models.revision import Revision
 from changes.models.source import Source
-from changes.models.test import TestResult
+from changes.models.test import TestCase
 from changes.testutils.fixtures import SAMPLE_DIFF
 from changes.utils.slugs import slugify
 
@@ -450,6 +450,6 @@ def test_result(jobstep, **kwargs):
 
     kwargs.setdefault('result', Result.passed)
 
-    result = TestResult(step=jobstep, **kwargs)
+    result = TestCase(step=jobstep, **kwargs)
 
     return result
