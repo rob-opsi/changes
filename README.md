@@ -1,15 +1,12 @@
-Changes
--------
+# Changes
 
 This project is a fork of Dropbox's Changes endeavor (which is no longer maintained). It's a work in progress and not yet functional.
 
-Screenshot
-==========
+## Screenshot
 
-.. image:: https://github.com/getsentry/changes/raw/master/docs/images/example.png
+<img src="https://github.com/getsentry/changes/raw/master/docs/images/example.png" />
 
-Getting Started
-===============
+## Getting Started
 
 TODO: make docs better, for now, do this:
 
