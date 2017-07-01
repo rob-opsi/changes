@@ -12,7 +12,9 @@ from honcho.manager import Manager
 def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(description='Manage builds')
 
-    parser.add_argument('--workers', action='store_true', dest='workers', default=False)
+    parser.add_argument('-l', '--log-level', dest='log_level', default='INFO')
+    parser.add_argument('--workers', action='store_true',
+                        dest='workers', default=False)
 
     args = parser.parse_args(argv)
 
@@ -26,7 +28,8 @@ def main(argv=sys.argv[1:]):
         ('webpack', ['webpack', '--watch']),
     ]
     if args.workers:
-        daemons.append(('worker', ['bin/worker', '--beat']))
+        daemons.append(
+            ('worker', ['bin/worker', '--beat', '-l {}'.format(args.log_level)]))
 
     cwd = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir))
 
