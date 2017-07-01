@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react';
 import moment from 'moment';
 import {OverlayTrigger, Tooltip} from 'react-bootstrap';
+import _ from 'underscore';
 
 import {LiveTime, display_duration} from 'display/time';
 import {

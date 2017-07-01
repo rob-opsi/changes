@@ -1,5 +1,6 @@
 import React from 'react';
 import URI from 'urijs';
+import _ from 'underscore';
 
 import * as utils from 'utils/utils';
 

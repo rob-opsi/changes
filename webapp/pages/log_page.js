@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react';
 import URI from 'urijs';
 import {Modal} from 'react-bootstrap';
+import _ from 'underscore';
 
 import ChangesLinks from 'display/changes/links';
 import SimpleTooltip from 'display/simple_tooltip';

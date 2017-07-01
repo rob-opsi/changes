@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'underscore';
 
 /*
  * When creating a display component, add some example usages using

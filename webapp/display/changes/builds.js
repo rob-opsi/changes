@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
 import {Popover, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import _ from 'underscore';
 
 import ChangesLinks from 'display/changes/links';
 import {Button} from 'display/button';

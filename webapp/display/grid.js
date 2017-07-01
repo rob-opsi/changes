@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
+import _ from 'underscore';
 
 import Examples from 'display/examples';
 import {ProgrammingError} from 'display/errors';

@@ -1,4 +1,6 @@
 import React from 'react';
+import _ from 'underscore';
+
 import {Button} from 'display/button';
 import {SUCCESS, FAILURE} from 'display/flash';
 import SimpleTooltip from 'display/simple_tooltip';

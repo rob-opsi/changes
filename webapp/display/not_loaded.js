@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import _ from 'underscore';
 
 import {AjaxError, ProgrammingError} from 'display/errors';
 import {RandomLoadingMessage, InlineLoading} from 'display/loading';

@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
 import URI from 'urijs';
+import _ from 'underscore';
 
 import APINotLoaded from 'display/not_loaded';
 import ChangesLinks from 'display/changes/links';

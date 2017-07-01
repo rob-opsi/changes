@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react';
 import moment from 'moment';
 import URI from 'urijs';
+import _ from 'underscore';
 
 import ChangesLinks from 'display/changes/links';
 import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';

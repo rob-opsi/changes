@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import _ from 'underscore';
 
 import ChangesLinks from 'display/changes/links';
 import SimpleTooltip from 'display/simple_tooltip';

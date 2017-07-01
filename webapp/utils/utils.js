@@ -4,6 +4,7 @@
  *
  * Some more changes-specific stuff is in display/changes/utils.py
  */
+import _ from 'underscore';
 
 //
 // Generic stuff

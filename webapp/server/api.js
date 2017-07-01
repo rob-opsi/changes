@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'underscore';
 
 import {Error} from 'display/errors';
 import {FlashMessage, SUCCESS, FAILURE} from 'display/flash';

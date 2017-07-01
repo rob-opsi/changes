@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
 import moment from 'moment';
+import _ from 'underscore';
 
 import Examples from 'display/examples';
 

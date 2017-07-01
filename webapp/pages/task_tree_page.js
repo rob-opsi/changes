@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import _ from 'underscore';
 
 import SectionHeader from 'display/section_header';
 import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';

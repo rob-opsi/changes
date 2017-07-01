@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'underscore';
 
 import ChangesUI from 'display/changes/ui';
 import {Button} from 'display/button';
