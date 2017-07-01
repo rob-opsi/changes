@@ -7,6 +7,7 @@ import AdminHomePage from '../admin/pages/home/page';
 import AdminProjectDetailsPage from '../admin/pages/projectDetails/page';
 import AdminRepoDetailsPage from '../admin/pages/repoDetails/page';
 
+import AuthorDetailsPage from '../pages/authorDetails/page';
 import HomePage from '../pages/home/page';
 import ProjectDetailsPage from '../pages/projectDetails/page';
 import ProjectListPage from '../pages/projectList/page';
@@ -16,6 +17,7 @@ export default (
     <IndexRoute component={HomePage} />
     <Route path="projects" component={ProjectListPage} />
     <Route path="projects/:projectSlug" component={ProjectDetailsPage} />
+    <Route path="authors/:email" component={AuthorDetailsPage} />
     <Route path="admin" component={AdminHomePage} />
     <Route path="admin/projects/:projectSlug" component={AdminProjectDetailsPage} />
     <Route path="admin/repos/:repositoryID" component={AdminRepoDetailsPage} />
@@ -23,7 +25,6 @@ export default (
 );
 
 // var url_contains = {
-//   author_builds: [AuthorBuildsPage, 'author'],
 //   commit_source: [CommitPage, 'sourceUUID'],
 //   diff: [DiffPage, 'diff_id'],
 //   single_build: [SingleBuildPage, 'buildID'],

@@ -14,13 +14,13 @@ import InteractiveData from 'pages/helpers/interactive_data';
 
 import * as utils from 'utils/utils';
 
-var AuthorBuildsPage = React.createClass({
+export default React.createClass({
   propTypes: {
     author: PropTypes.string
   },
 
   componentWillMount: function() {
-    var author = this.props.author || 'me';
+    var author = this.props.params.author || 'me';
 
     this.setState({
       buildsInteractive: InteractiveData(
@@ -46,7 +46,7 @@ var AuthorBuildsPage = React.createClass({
 
     var data_to_show = interactive.getDataToShow();
 
-    var data = _.map(data_to_show.getReturnedData(), build => {
+    var data = data_to_show.getReturnedData().map(build => {
       var target = null;
       if (_.contains(build.tags, 'arc test')) {
         target = '';
@@ -97,8 +97,8 @@ var AuthorBuildsPage = React.createClass({
 
     var title = 'My Builds',
       headerText = 'My Builds';
-    if (this.props.author && this.props.author !== 'me') {
-      var username = utils.email_head(this.props.author);
+    if (this.props.params.author && this.props.params.author !== 'me') {
+      var username = utils.email_head(this.props.params.author);
       title = `${username} - Builds`;
       headerText = `Builds by ${username}`;
     }
@@ -128,5 +128,3 @@ var AuthorBuildsPage = React.createClass({
     );
   }
 });
-
-export default AuthorBuildsPage;

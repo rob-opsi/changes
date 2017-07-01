@@ -15,11 +15,11 @@ var ChangesLinks = {
       return 'unknown';
     }
     var classes = subtle ? 'subtle' : '';
-    var author_href = `/author/${author.email}`;
+    var author_href = `/authors/${author.id}`;
     return (
-      <a href={author_href} className={classes}>
+      <Link to={author_href} className={classes}>
         {utils.email_head(author.email)}
-      </a>
+      </Link>
     );
   },
 
