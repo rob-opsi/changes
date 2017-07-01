@@ -72,8 +72,8 @@ parser_edit.add_argument('--url', dest='url', help='repository url')
 parser_edit.add_argument(
     '--backend', metavar='backend', dest='backend',
     help='repository backend', choices=('git', 'hg', 'unknown'))
-parser_add.add_argument('--active', dest='active', action='store_true')
-parser_add.add_argument('--inactive', dest='active', action='store_false')
+parser_edit.add_argument('--active', dest='active', action='store_true')
+parser_edit.add_argument('--inactive', dest='active', action='store_false')
 
 parser_show = subparsers.add_parser('show', help='show repository details')
 parser_show.add_argument('id', help='repository ID or url')
