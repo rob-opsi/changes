@@ -59,6 +59,9 @@ subparsers = parser.add_subparsers(dest='command')
 parser_add = subparsers.add_parser('add', help='add repository')
 parser_add.add_argument('--url', metavar='url',
                         dest='url', help='repository url')
+parser_add.add_argument('--active', dest='active',
+                        default=True, action='store_true')
+parser_add.add_argument('--inactive', dest='active', action='store_false')
 parser_add.add_argument(
     '--backend', metavar='backend', dest='backend',
     help='repository backend', choices=('git', 'hg', 'unknown'), default='unknown')
@@ -110,6 +113,7 @@ if args.command == 'add':
     repo = Repository(
         url=url,
         backend=RepositoryBackend[args.backend],
+        status=RepositoryStatus.active if args.active else RepositoryStatus.inactive,
     )
 
     db.session.add(repo)
