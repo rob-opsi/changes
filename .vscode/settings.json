@@ -25,9 +25,14 @@
         "editor.formatOnSave": true
     },
 
+    "[python]": {
+        "editor.formatOnSave": true
+    },
+
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
 
+    "python.formatting.provider": "autopep8",
     "python.pythonPath": "${env.WORKON_HOME}/changes/bin/python",
     "python.unitTest.pyTestEnabled": true,
     "python.unitTest.unittestEnabled": false,
