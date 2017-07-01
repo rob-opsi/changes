@@ -84,7 +84,7 @@ class Repository(db.Model):
         )
 
         kwargs = {
-            'path': os.path.join(current_app.config['REPO_ROOT'], self.id.hex),
+            'path': os.path.join(os.path.expanduser(current_app.config['REPO_ROOT']), self.id.hex),
             'url': self.url,
             'username': options.get('auth.username'),
         }
