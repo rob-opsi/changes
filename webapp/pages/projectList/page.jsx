@@ -377,13 +377,14 @@ export default React.createClass({
   renderPlansByType: function(projects_data) {
     var every_plan = _.flatten(projects_data.map(p => p.plans));
 
-    var every_plan_type = _.flow(
-      _.map(p => (p.steps.length > 0 ? this.getStepType(p.steps[0]) : '')),
-      _.compact,
-      _.uniq,
-      // sort, hoisting build types starting with [LXC] to the top
-      _.sortBy(t => (t.charAt(0) === '[' ? '0' + t : t))
-    )(every_plan);
+    var every_plan_type = _.sortBy(
+      _.uniq(
+        every_plan
+          .map(p => (p.steps.length > 0 ? this.getStepType(p.steps[0]) : ''))
+          .filter(p => !!p)
+      ),
+      t => (t.charAt(0) === '[' ? '0' + t : t)
+    );
 
     var rows_lists = [];
     every_plan_type.forEach(type => {
@@ -433,12 +434,11 @@ export default React.createClass({
   renderPlansByCluster: function(projects_data) {
     var every_plan = _.flatten(projects_data.map(p => p.plans));
 
-    var every_plan_type = _.flow(
-      _.map(p => (p.steps.length > 0 ? this.getStepCluster(p.steps[0]) : '')),
-      _.compact,
-      _.uniq,
-      _.sortBy
-    )(every_plan);
+    var every_plan_type = _.uniq(
+      every_plan
+        .map(p => (p.steps.length > 0 ? this.getStepCluster(p.steps[0]) : ''))
+        .filter(p => !!p)
+    ).sort();
 
     var rows_lists = [];
     every_plan_type.forEach(type => {

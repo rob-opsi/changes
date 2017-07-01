@@ -42,7 +42,7 @@ export const ManyBuildsStatus = React.createClass({
     // grab the latest builds for each project
     var builds_by_project = _.groupBy(builds_for_last_code_change, b => b.project.slug);
     var latest_builds = _.map(builds_by_project, builds => {
-      return _.flow(_.sortBy(b => b.dateCreated), _.last())(builds);
+      return _.last(_.sortBy(builds, b => b.dateCreated));
     });
 
     // TOOD: how to order projects? Right now, I do it alphabetically by project name...

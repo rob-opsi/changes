@@ -84,7 +84,7 @@ var ChangesLinks = {
         .search({buildID: build.id})
         .toString();
     } else {
-      return URI(`/single_build/${build.id}/`);
+      return URI(`/builds/${build.id}`);
     }
   },
 
@@ -107,7 +107,7 @@ var ChangesLinks = {
     } else if (build.source.patch && build.source.data['phabricator.revisionID']) {
       return URI(`/diff/D${build.source.data['phabricator.revisionID']}`).toString();
     } else {
-      return URI(`/single_build/${build.id}/`);
+      return URI(`/builds/${build.id}`);
     }
   },
 

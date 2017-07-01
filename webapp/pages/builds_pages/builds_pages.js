@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import {Link} from 'react-router';
 import moment from 'moment';
 import URI from 'urijs';
 import _ from 'lodash';
@@ -69,7 +70,7 @@ export const DiffPage = React.createClass({
     diff_data['revision_id'] = diff_data['revision_id'] || this.props.diff_id.substr(1);
     diff_data['dateCreated'] = diff_data['dateCreated'] || 0; // unix timestamp
 
-    var builds = _.flow(_.pluck('builds'), _.flatten())(diff_data.changes);
+    var builds = _.flatten(diff_data.changes.map(c => c.builds));
 
     return <BuildsPage type="diff" targetData={diff_data} builds={builds} />;
   }
@@ -138,15 +139,15 @@ export const CommitPage = React.createClass({
       }
 
       var links = this.state.commitBuilds.getReturnedData().map(b => {
-        var href = URI(`/single_build/${b.id}/`);
+        var href = URI(`/builds/${b.id}`);
         var condition = get_runnable_condition(b);
         return (
           <div>
             <TimeText time={b.dateFinished || b.dateStarted || b.dateCreated} />
             {': '}
-            <a href={href}>
+            <Link to={href}>
               {b.project.name}
-            </a>
+            </Link>
             {' ('}
             <span className={get_runnable_condition_color_cls(condition)}>
               {get_runnable_condition_short_text(condition)}
@@ -198,7 +199,7 @@ export const CommitPage = React.createClass({
  * The internal page shared by CommitPage and DiffPage (since the logic is
  * basically the same)
  */
-export default React.createClass({
+const BuildsPage = React.createClass({
   propTypes: {
     // are we rendering for a diff or a commit
     type: PropTypes.oneOf(['diff', 'commit']).isRequired,
@@ -209,16 +210,17 @@ export default React.createClass({
     builds: PropTypes.array.isRequired
   },
 
-  getInitialState: function() {
+  getInitialState() {
     var query_params = URI(window.location.href).search(true);
 
     return {
-      activeBuildID: query_params.buildID,
+      activeBuildID: this.props.params.buildID,
       tests: {} // fetched on demand
     };
   },
 
-  render: function() {
+  render() {
+    // TODO(dcramer): this should be componentWillReceiptProps
     this.updateWindowUrl();
 
     // TODO: cleanup!
@@ -244,9 +246,9 @@ export default React.createClass({
     );
   },
 
-  updateWindowUrl: function() {
+  updateWindowUrl() {
     var query_params = URI(window.location.href).search(true);
-    if (this.state.activeBuildID !== query_params['buildID']) {
+    if (this.state.activeBuildID !== this.props.params.buildID) {
       query_params['buildID'] = this.state.activeBuildID;
       window.history.replaceState(
         null,
@@ -258,7 +260,7 @@ export default React.createClass({
     }
   },
 
-  getErrorMessage: function() {
+  getErrorMessage() {
     if (this.props.type === 'diff') {
       var diff_data = this.props.targetData;
       if (!diff_data['fetched_data_from_phabricator']) {
@@ -272,7 +274,7 @@ export default React.createClass({
     return null;
   },
 
-  getContent: function() {
+  getContent() {
     var builds = this.props.builds;
 
     if (this.state.activeBuildID) {
@@ -291,7 +293,9 @@ export default React.createClass({
     if (this.props.type === 'diff') {
       var builds_by_diff_id = _.groupBy(builds, b => b.source.data['phabricator.diffID']);
 
-      var latest_diff_id = _.flow(_.keys, _.sortBy, _.last)(builds_by_diff_id);
+      var latest_diff_id = builds
+        .sort((a, b) => b.dateCreated - a.dateCreated)
+        .find(() => true);
 
       latest_builds = builds_by_diff_id[latest_diff_id];
     }
@@ -306,7 +310,7 @@ export default React.createClass({
     );
   },
 
-  renderLabelHeader: function() {
+  renderLabelHeader() {
     var type = this.props.type;
 
     var header = 'No header yet';
@@ -387,7 +391,7 @@ export default React.createClass({
     return header;
   },
 
-  getAuthorForDiff: function(builds) {
+  getAuthorForDiff(builds) {
     // the author of any cause=phabricator build for a diff is always the
     // same as the author of the diff.
     var author = null;
@@ -399,29 +403,25 @@ export default React.createClass({
     return author;
   },
 
-  getSourceForDiff: function(builds) {
+  getSourceForDiff(builds) {
     return builds && builds.length && builds[0].source;
   }
 });
 
 export const SingleBuildPage = React.createClass({
-  propTypes: {
-    buildID: PropTypes.string.isRequired
-  },
-
-  getInitialState: function() {
+  getInitialState() {
     return {
       build: null
     };
   },
 
-  componentDidMount: function() {
+  componentDidMount() {
     api.fetch(this, {
-      build: `/api/0/builds/${this.props.buildID}`
+      build: `/api/0/builds/${this.props.params.buildID}`
     });
   },
 
-  render: function() {
+  render() {
     if (!api.isLoaded(this.state.build)) {
       return <APINotLoadedPage calls={this.state.build} />;
     }
@@ -501,3 +501,5 @@ export const ParentCommit = React.createClass({
     );
   }
 });
+
+export default BuildsPage;

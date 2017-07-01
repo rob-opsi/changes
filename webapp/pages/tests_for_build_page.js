@@ -627,7 +627,7 @@ var ShardingTab = React.createClass({
     var build = this.props.build;
     var jobIDs = build.jobs.map(j => j.id);
 
-    var phasesCalls = _.flow(_.pick(jobIDs), _.values)(this.state.jobPhases);
+    var phasesCalls = _.values(_.pick(this.state.jobPhases, jobIDs));
 
     if (!api.allLoaded(phasesCalls)) {
       return <APINotLoaded calls={phasesCalls} />;

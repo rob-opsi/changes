@@ -256,18 +256,14 @@ var Commits = React.createClass({
     var grid_data = [];
     commits.forEach(c => {
       // Render links to the projects that ran builds (for user convenience..)
-      var project_links = _.flow(
-        _.map(b => b.project),
-        _.compact,
-        _.uniq(p => p.slug),
-        _.sortBy(p => p.name),
-        _.map(p =>
-          <div>
-            {ChangesLinks.project(p)}
-          </div>
-        ),
-        _.flatten
-      )(c.builds);
+      var project_links = _.sortBy(
+        _.uniq(c.builds.map(b => b.project).filter(b => !!b)),
+        p => p.name
+      ).map(p =>
+        <div>
+          {ChangesLinks.project(p)}
+        </div>
+      );
 
       var name = utils.truncate(utils.first_line(c.revision.message));
       if (c.builds.length > 0) {

@@ -184,11 +184,11 @@ var Sidebar = React.createClass({
     builds = buildsForLastCodeChange(builds);
 
     // we want the most recent build for each project
-    return _.flow(
-      _.groupBy(b => b.project.name),
-      _.map(projBuilds => _.last(_.sortBy(projBuilds, b => b.dateCreated))),
-      _.values()
-    )(builds);
+    return _.values(
+      _.map(_.groupBy(builds, b => b.project.name), projBuilds =>
+        _.last(_.sortBy(projBuilds, b => b.dateCreated))
+      )
+    );
   },
 
   renderLatestItem: function(builds) {
@@ -219,7 +219,7 @@ var Sidebar = React.createClass({
     if (builds === undefined) {
       return null;
     }
-    builds = _.flow(_.sortBy(b => b.dateCreated), _.reverse())(builds);
+    builds = _.sortBy(builds, b => b.dateCreated).reverse();
 
     var latestPerProj = this.getLatestPerProject(builds);
     var shouldDim = build => {
