@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+from __future__ import absolute_import, print_function
+
+import argparse
+import os
+import sys
+
+from subprocess import list2cmdline
+from honcho.manager import Manager
+
+
+def main(argv=sys.argv[1:]):
+    parser = argparse.ArgumentParser(description='Manage builds')
+
+    parser.add_argument('--workers', action='store_true', dest='workers', default=False)
+
+    args = parser.parse_args(argv)
+
+    os.environ['PYTHONUNBUFFERED'] = 'true'
+    # os.environ['WEBPACK_LIVERELOAD'] = '1'
+
+    # Make sure that the environment is prepared before honcho takes over
+    # This sets all the appropriate uwsgi env vars, etc
+    daemons = [
+        ('web', ['bin/web']),
+        ('webpack', ['webpack', '--watch']),
+    ]
+    if args.workers:
+        daemons.append(('worker', ['bin/worker', '--beat']))
+
+    cwd = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir))
+
+    manager = Manager()
+    for name, cmd in daemons:
+        manager.add_process(
+            name, list2cmdline(cmd),
+            quiet=False, cwd=cwd,
+        )
+
+    manager.loop()
+    sys.exit(manager.returncode)
+
+
+if __name__ == '__main__':
+    main()
