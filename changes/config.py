@@ -295,10 +295,11 @@ def create_app(_read_config=True, **config):
             'task': 'check_repos',
             'schedule': timedelta(minutes=2),
         },
-        'sync-grouper': {
-            'task': 'sync_grouper',
-            'schedule': timedelta(minutes=1),
-        },
+        # XXX(dcramer): Grouper is dropbox specific. Probably should delete it.
+        # 'sync-grouper': {
+        #     'task': 'sync_grouper',
+        #     'schedule': timedelta(minutes=1),
+        # },
         'aggregate-flaky-tests': {
             'task': 'aggregate_flaky_tests',
             # Hour 7 GMT is midnight PST, hopefully a time of low load
