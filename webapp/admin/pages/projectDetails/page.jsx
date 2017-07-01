@@ -20,13 +20,13 @@ import * as utils from 'utils/utils';
 export default React.createClass({
   menuItems: ['Settings', 'Snapshots', 'Build Plans', 'New Build Plan'],
 
-  getInitialState: function() {
+  getInitialState() {
     return {
       selectedItem: null // set in componentWillMount
     };
   },
 
-  componentWillMount: function() {
+  componentWillMount() {
     let selectedItemFromHash = MenuUtils.selectItemFromHash(
       window.location.hash,
       this.menuItems
@@ -38,15 +38,15 @@ export default React.createClass({
     this.setState({selectedItem: this.initialTab});
   },
 
-  componentDidMount: function() {
-    let slug = this.props.projectSlug;
+  componentDidMount() {
+    let slug = this.props.params.projectSlug;
     api.fetch(this, {
       project: `/api/0/projects/${slug}`,
       snapshots: `/api/0/projects/${slug}/snapshots`
     });
   },
 
-  render: function() {
+  render() {
     if (!api.isLoaded(this.state.project)) {
       return <APINotLoadedPage calls={this.state.project} />;
     }
@@ -109,11 +109,11 @@ let ProjectSettingsFieldGroup = React.createClass({
     project: PropTypes.object.isRequired
   },
 
-  getInitialState: function() {
+  getInitialState() {
     return {};
   },
 
-  getFieldNames: function() {
+  getFieldNames() {
     return [
       'name',
       'repository',
@@ -144,7 +144,7 @@ let ProjectSettingsFieldGroup = React.createClass({
     Inactive: 'inactive'
   },
 
-  saveSettings: function() {
+  saveSettings() {
     let state = this.state;
     let project_params = {
       name: state.name,
@@ -186,7 +186,7 @@ let ProjectSettingsFieldGroup = React.createClass({
     api.post(this, endpoints, params, this.onFormSubmit);
   },
 
-  componentDidMount: function() {
+  componentWillMount() {
     let project = this.props.project;
     this.setState(
       {

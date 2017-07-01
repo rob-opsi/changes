@@ -4,8 +4,8 @@ import {Route, IndexRoute} from 'react-router';
 import App from './App';
 
 import AdminHomePage from '../admin/pages/home/page';
-import AdminProjectListPage from '../admin/pages/projectList/page';
-import AdminRepoListPage from '../admin/pages/repoList/page';
+import AdminProjectDetailsPage from '../admin/pages/projectDetails/page';
+import AdminRepoDetailsPage from '../admin/pages/repoDetails/page';
 
 import HomePage from '../pages/home/page';
 import ProjectDetailsPage from '../pages/projectDetails/page';
@@ -17,8 +17,8 @@ export default (
     <Route path="projects" component={ProjectListPage} />
     <Route path="projects/:projectSlug" component={ProjectDetailsPage} />
     <Route path="admin" component={AdminHomePage} />
-    <Route path="admin/projects" component={AdminProjectListPage} />
-    <Route path="admin/repos" component={AdminRepoListPage} />
+    <Route path="admin/projects/:projectSlug" component={AdminProjectDetailsPage} />
+    <Route path="admin/repos/:repositoryID" component={AdminRepoDetailsPage} />
   </Route>
 );
 

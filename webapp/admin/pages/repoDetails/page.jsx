@@ -52,7 +52,7 @@ export default React.createClass({
   },
 
   componentDidMount: function() {
-    let repositoryID = this.props.repositoryID;
+    let repositoryID = this.props.params.repositoryID;
     api.fetch(this, {
       repository: `/api/0/repositories/${repositoryID}`,
       projects: `/api/0/repositories/${repositoryID}/projects`
