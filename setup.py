@@ -26,7 +26,7 @@ tests_require = [
 ]
 
 install_requires = [
-    'amqp>=1.4.2,<2.0.0',
+    'amqp==2.1.4',
     'alembic>=0.9.2,<1.0.0',
     'anyjson>=0.3.3,<0.4.0',
     'argparse>=1.2.1,<1.3.0',
