@@ -1,9 +1,8 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import Examples from 'es6!display/examples';
+import Examples from 'display/examples';
 
-export var Button = React.createClass({
-
+export const Button = React.createClass({
   propTypes: {
     // blue for primary actions, white for secondary, paging just for paging
     // links, chart-paging for the chart on the builds page
@@ -21,11 +20,11 @@ export var Button = React.createClass({
     return {
       type: 'blue',
       disabled: false
-    }
+    };
   },
 
   render: function() {
-    var { label, className, ...props } = this.props;  // eslint-disable-line
+    var {label, className, ...props} = this.props; // eslint-disable-line
 
     var buttonClass = {
       blue: 'blueButton button ',
@@ -33,39 +32,59 @@ export var Button = React.createClass({
       paging: 'pagingButton button ',
       chart_paging: 'chartPagingButton ',
       red: 'redButton button ',
-      flash: 'flashButton button ',
+      flash: 'flashButton button '
     }[this.props.type];
 
-    var className = buttonClass + (className || "");
+    var className = buttonClass + (className || '');
     if (this.props.disabled) {
-      className += " disabled";
+      className += ' disabled';
       props.href = null;
       props.onClick = null;
     }
 
-    return <a className={className} {...props}>{this.props.children}</a>;
+    return (
+      <a className={className} {...props}>
+        {this.props.children}
+      </a>
+    );
   }
 });
 
 Examples.add('Buttons', __ => {
   return [
     <div>
-      <Button className="marginRightS" type="blue">Main Button</Button>
-      <Button disabled={true} className="marginRightS" type="blue">Disabled Button</Button>
+      <Button className="marginRightS" type="blue">
+        Main Button
+      </Button>
+      <Button disabled={true} className="marginRightS" type="blue">
+        Disabled Button
+      </Button>
     </div>,
     <div>
-      <Button className="marginRightS" type="white">Secondary Button</Button>
-      <Button disabled={true} type="white">Secondary Button</Button>
+      <Button className="marginRightS" type="white">
+        Secondary Button
+      </Button>
+      <Button disabled={true} type="white">
+        Secondary Button
+      </Button>
     </div>,
     <div>
-      <Button className="marginRightS" type="paging">&laquo; Previous</Button>
-      <Button disabled={true} type="paging">Next &raquo;</Button>
+      <Button className="marginRightS" type="paging">
+        &laquo; Previous
+      </Button>
+      <Button disabled={true} type="paging">
+        Next &raquo;
+      </Button>
     </div>,
     <div>
-      <Button className="marginRightS" type="red">Remove this tag</Button>
+      <Button className="marginRightS" type="red">
+        Remove this tag
+      </Button>
     </div>,
     <div>
-      <Button className="marginRightS" type="flash">Close the notification</Button>
+      <Button className="marginRightS" type="flash">
+        Close the notification
+      </Button>
     </div>
   ];
 });

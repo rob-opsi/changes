@@ -1,18 +1,20 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import ChangesLinks from 'es6!display/changes/links';
-import { ChangesPage, APINotLoadedPage } from 'es6!display/page_chrome';
-import { Grid, GridRow } from 'es6!display/grid';
-import { SingleBuildStatus } from 'es6!display/changes/builds';
-import { TimeText, display_duration_pieces } from 'es6!display/time';
-import { WaitingLiveText } from 'es6!display/changes/build_text';
-import { get_runnable_condition,
-         get_runnable_condition_color_cls,
-         is_waiting } from 'es6!display/changes/build_conditions';
+import ChangesLinks from 'display/changes/links';
+import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
+import {Grid, GridRow} from 'display/grid';
+import {SingleBuildStatus} from 'display/changes/builds';
+import {TimeText, display_duration_pieces} from 'display/time';
+import {WaitingLiveText} from 'display/changes/build_text';
+import {
+  get_runnable_condition,
+  get_runnable_condition_color_cls,
+  is_waiting
+} from 'display/changes/build_conditions';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
-import * as utils from 'es6!utils/utils';
+import * as utils from 'utils/utils';
 
 // how often to hit the api server for updates
 const POLL_INTERVAL = 10000;
@@ -29,7 +31,6 @@ const POLL_INTERVAL = 10000;
  * - A parameter can be just a project slug, or slug::branch.
  */
 var PusherPage = React.createClass({
-
   getInitialTitle() {
     return 'Dashboard';
   },
@@ -62,9 +63,7 @@ var PusherPage = React.createClass({
         this.updateInProgress = false;
         utils.async(__ => {
           var emptyLiveUpdate = _.mapObject(this.getEndpoints(), (v, k) => null);
-          this.setState(_.extend(
-            {liveUpdate: emptyLiveUpdate},
-            this.state.liveUpdate));
+          this.setState(_.extend({liveUpdate: emptyLiveUpdate}, this.state.liveUpdate));
         });
       }
     }
@@ -74,7 +73,7 @@ var PusherPage = React.createClass({
     var apiResponses = _.map(endpoints, (v, k) => this.state[k]);
 
     if (!api.allLoaded(apiResponses)) {
-      return <APINotLoadedPage calls={apiResponses} widget={false} />; 
+      return <APINotLoadedPage calls={apiResponses} widget={false} />;
     }
 
     // Adding key=current timestamp forces us to unmount/remount
@@ -82,14 +81,16 @@ var PusherPage = React.createClass({
     // leaks, albeit at the cost of slightly less responsiveness (which is fine
     // for a dashboard.) I think I could solve this in a more sophisticated
     // way, but this is fine for now.
-    return <ChangesPage widget={false}>
-      <PusherPageContent
-        slugs={slugs}
-        branch={branch}
-        fetchedState={this.state}
-        key={+Date.now()}
-      />
-    </ChangesPage>;
+    return (
+      <ChangesPage widget={false}>
+        <PusherPageContent
+          slugs={slugs}
+          branch={branch}
+          fetchedState={this.state}
+          key={+Date.now()}
+        />
+      </ChangesPage>
+    );
   },
 
   getSlugsAndBranch() {
@@ -136,7 +137,7 @@ var PusherPage = React.createClass({
     var endpoints = {};
     _.each(slugs, slug => {
       endpoints[slug] = URI(`/api/0/projects/${slug}/commits/`)
-        .query({ all_builds: 1, branch: branch, per_page: per_page })
+        .query({all_builds: 1, branch: branch, per_page: per_page})
         .toString();
     });
     return endpoints;
@@ -161,15 +162,15 @@ var PusherPage = React.createClass({
   }
 });
 
-
 var PusherPageContent = React.createClass({
-  
   propTypes: {
     slugs: PropTypes.array.isRequired,
-    branch: PropTypes.string.isRequired,
+    branch: PropTypes.string.isRequired
   },
 
-  getInitialState() { return {}; },
+  getInitialState() {
+    return {};
+  },
 
   render() {
     var slugs = this.props.slugs;
@@ -220,27 +221,26 @@ var PusherPageContent = React.createClass({
               .map(p => p.replace(/[dmsh]/, ''))
               .value();
 
-            duration = pieces.join(":");
+            duration = pieces.join(':');
           }
-            
-          var colorCls = get_runnable_condition_color_cls(get_runnable_condition(lastBuild));
+
+          var colorCls = get_runnable_condition_color_cls(
+            get_runnable_condition(lastBuild)
+          );
           var durationStyle = {
             display: 'inline-block',
             position: 'relative',
-            top: -2,
+            top: -2
           };
 
           initialCells.push(
             <div>
               <div className="inlineBlock">
-                <SingleBuildStatus
-                  build={lastBuild}
-                  parentElem={this}
-                />
+                <SingleBuildStatus build={lastBuild} parentElem={this} />
               </div>
-              <a 
+              <a
                 href={ChangesLinks.buildHref(lastBuild)}
-                className={colorCls} 
+                className={colorCls}
                 style={durationStyle}>
                 {duration}
               </a>
@@ -259,7 +259,9 @@ var PusherPageContent = React.createClass({
         title,
         ChangesLinks.author(baseCommit.author),
         ChangesLinks.phabCommit(baseCommit),
-        <span><TimeText time={baseCommit.dateCommitted} /></span>
+        <span>
+          <TimeText time={baseCommit.dateCommitted} />
+        </span>
       ]);
       return new GridRow(baseCommit.sha, cells);
     });
@@ -267,36 +269,33 @@ var PusherPageContent = React.createClass({
     var projectHeaders = _.map(slugs, proj => {
       var name = utils.truncate(
         (projectData[proj] && projectData[proj].name) || proj,
-        20);
-      return <div className="pusherProjectHeader">
-                <div className="projectName">{name}</div>
-             </div>;
+        20
+      );
+      return (
+        <div className="pusherProjectHeader">
+          <div className="projectName">
+            {name}
+          </div>
+        </div>
+      );
     });
 
-    var headers = projectHeaders.concat([
-      'Name',
-      'Author',
-      'Commit',
-      'Committed'
-    ]);
+    var headers = projectHeaders.concat(['Name', 'Author', 'Commit', 'Committed']);
 
     var classHeaders = _.map(slugs, proj => 'nowrap buildWidgetCell');
-    var cellClasses = classHeaders.concat([
-      'wide',
-      'nowrap',
-      'nowrap',
-      'nowrap'
-    ]);
+    var cellClasses = classHeaders.concat(['wide', 'nowrap', 'nowrap', 'nowrap']);
 
-    return <div>
-      <Grid
-        colnum={4 + totalProjectCount}
-        cellClasses={cellClasses}
-        headers={headers}
-        data={rows}
-      />
-    </div>;
-  },
+    return (
+      <div>
+        <Grid
+          colnum={4 + totalProjectCount}
+          cellClasses={cellClasses}
+          headers={headers}
+          data={rows}
+        />
+      </div>
+    );
+  }
 });
 
 export default PusherPage;

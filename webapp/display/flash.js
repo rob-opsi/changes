@@ -1,12 +1,12 @@
-import React, { PropTypes } from 'react';
-import { Button } from 'es6!display/button';
+import React, {PropTypes} from 'react';
+import {Button} from 'display/button';
 
 export const SUCCESS = 'success';
 export const FAILURE = 'failure';
 export const WARNING = 'warning';
 export const INFO = 'info';
 
-export var FlashMessage = React.createClass({
+export const FlashMessage = React.createClass({
   propTypes: {
     message: PropTypes.node.isRequired,
     type: PropTypes.oneOf([SUCCESS, FAILURE, WARNING, INFO]).isRequired
@@ -24,12 +24,16 @@ export var FlashMessage = React.createClass({
 
       let hide = () => this.setState({visible: false});
 
-      return <div className="flashWrapper">
-        <div className={className}>
-          {this.props.message}
-          <Button type="flash" onClick={hide}>X</Button>
+      return (
+        <div className="flashWrapper">
+          <div className={className}>
+            {this.props.message}
+            <Button type="flash" onClick={hide}>
+              X
+            </Button>
+          </div>
         </div>
-      </div>;
+      );
     }
     return null;
   }

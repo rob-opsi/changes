@@ -104,29 +104,29 @@ class Exports:
 
       if (item["mode"] == "default"):
         imports_to_add.append((
-          "import %s from 'es6!%s';" % (exports_in_file[0], item['include_path']),
+          "import %s from '%s';" % (exports_in_file[0], item['include_path']),
           item['include_path']
         ))
       else:
         if export_prefix:
           imports_to_add.append((
-            "import * as %s from 'es6!%s';" % (export_prefix, item['include_path']),
+            "import * as %s from '%s';" % (export_prefix, item['include_path']),
             item['include_path']
           ))
         else:
           imports_to_add.append((
-            "import { %s } from 'es6!%s';" % (", ".join(exports_in_file), item['include_path']),
+            "import { %s } from '%s';" % (", ".join(exports_in_file), item['include_path']),
             item['include_path']
           ))
     # end of for block
 
     # special cases
 
-    # if we have a closing/self-closing html tag, we should probably import 
+    # if we have a closing/self-closing html tag, we should probably import
     # react.
     # todo: strip out comments from this search string
     other_imports = ""
-    if (re.search("<\/\w", without_most_comments) or 
+    if (re.search("<\/\w", without_most_comments) or
       re.search("\/>", without_most_comments)):
       other_imports += "import React, { PropTypes } from 'react';\n"
 

@@ -1,22 +1,21 @@
 import React from 'react';
 
-import ChangesLinks from 'es6!display/changes/links';
-import ChangesUI from 'es6!display/changes/ui';
-import Request from 'es6!display/request';
-import SectionHeader from 'es6!display/section_header';
-import SimpleTooltip from 'es6!display/simple_tooltip';
-import { ChangesPage, APINotLoadedPage } from 'es6!display/page_chrome';
-import { Grid, GridRow } from 'es6!display/grid';
-import { Menu1, MenuUtils } from 'es6!display/menus';
-import { SingleBuildStatus } from 'es6!display/changes/builds';
-import { TimeText } from 'es6!display/time';
+import ChangesLinks from 'display/changes/links';
+import ChangesUI from 'display/changes/ui';
+import Request from 'display/request';
+import SectionHeader from 'display/section_header';
+import SimpleTooltip from 'display/simple_tooltip';
+import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
+import {Grid, GridRow} from 'display/grid';
+import {Menu1, MenuUtils} from 'display/menus';
+import {SingleBuildStatus} from 'display/changes/builds';
+import {TimeText} from 'display/time';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
-import * as utils from 'es6!utils/utils';
+import * as utils from 'utils/utils';
 
 var AllProjectsPage = React.createClass({
-
   getInitialTitle: function() {
     return 'All Projects';
   },
@@ -27,7 +26,7 @@ var AllProjectsPage = React.createClass({
     'Plans',
     'Plans By Type',
     'Plans By Cluster',
-    'Jenkins Plans By Master',
+    'Jenkins Plans By Master'
   ],
 
   getInitialState: function() {
@@ -37,16 +36,18 @@ var AllProjectsPage = React.createClass({
 
       expandedConfigsInPlans: {},
       expandedConfigsInPlansByType: {},
-      expandedConfigsInPlansByCluster: {},
-    }
+      expandedConfigsInPlansByCluster: {}
+    };
   },
 
   componentWillMount: function() {
     var selected_item_from_hash = MenuUtils.selectItemFromHash(
-      window.location.hash, this.menuItems);
+      window.location.hash,
+      this.menuItems
+    );
 
     if (selected_item_from_hash) {
-      this.setState({ selectedItem: selected_item_from_hash });
+      this.setState({selectedItem: selected_item_from_hash});
     }
   },
 
@@ -67,11 +68,13 @@ var AllProjectsPage = React.createClass({
     // render menu
     var selected_item = this.state.selectedItem;
 
-    var menu = <Menu1
-      items={this.menuItems}
-      selectedItem={selected_item}
-      onClick={MenuUtils.onClick(this, selected_item)}
-    />;
+    var menu = (
+      <Menu1
+        items={this.menuItems}
+        selectedItem={selected_item}
+        onClick={MenuUtils.onClick(this, selected_item)}
+      />
+    );
 
     // TODO: what is the snapshot.current option and should I display it?
     // TODO: ordering
@@ -93,11 +96,19 @@ var AllProjectsPage = React.createClass({
         content = this.renderPlansByCluster(projects_data);
         break;
       case 'Jenkins Plans By Master':
-        if (!api.isLoaded(this.state.jenkins_master_blacklist) &&
-            !api.isLoaded(this.state.auth)) {
-          return <APINotLoadedPage calls={[this.state.jenkins_master_blacklist, this.state.auth]} />;
+        if (
+          !api.isLoaded(this.state.jenkins_master_blacklist) &&
+          !api.isLoaded(this.state.auth)
+        ) {
+          return (
+            <APINotLoadedPage
+              calls={[this.state.jenkins_master_blacklist, this.state.auth]}
+            />
+          );
         }
-        var blacklist = this.state.jenkins_master_blacklist.getReturnedData()['blacklist'];
+        var blacklist = this.state.jenkins_master_blacklist.getReturnedData()[
+          'blacklist'
+        ];
         var user = this.state.auth.getReturnedData()['user'];
         content = this.renderJenkinsPlansByMaster(projects_data, blacklist, user);
         break;
@@ -105,11 +116,15 @@ var AllProjectsPage = React.createClass({
         throw 'unreachable';
     }
 
-    return <ChangesPage highlight="Projects">
-      <SectionHeader>Projects</SectionHeader>
-      {menu}
-      <div className="marginTopM">{content}</div>
-    </ChangesPage>;
+    return (
+      <ChangesPage highlight="Projects">
+        <SectionHeader>Projects</SectionHeader>
+        {menu}
+        <div className="marginTopM">
+          {content}
+        </div>
+      </ChangesPage>
+    );
   },
 
   /*
@@ -117,26 +132,32 @@ var AllProjectsPage = React.createClass({
    * TODO: do we have any stats we want to show?
    */
   renderDefault: function(projects_data) {
-    var groups = [{
+    var groups = [
+      {
         minAge: -1,
         header: 'Recently built',
-        projects: [],
-    }, {
+        projects: []
+      },
+      {
         minAge: moment.duration(1, 'weeks').asSeconds(),
         header: 'Last built over 1 week ago',
-        projects: [],
-    }, {
+        projects: []
+      },
+      {
         minAge: moment.duration(1, 'months').asSeconds(),
         header: 'Last built over 1 month ago',
-        projects: [],
-    }, {
+        projects: []
+      },
+      {
         minAge: moment.duration(3, 'months').asSeconds(),
         header: 'Last built over 3 months ago',
-        projects: [],
-    }, {
+        projects: []
+      },
+      {
         header: 'Never finished a build',
-        projects: [],
-    }];
+        projects: []
+      }
+    ];
 
     // group builds
     _.each(projects_data, p => {
@@ -146,8 +167,8 @@ var AllProjectsPage = React.createClass({
         var age = ChangesUI.getBuildAge(p.lastBuild);
         for (var i = groups.length - 2; i >= 0; --i) {
           if (age > groups[i].minAge) {
-              groups[i].projects.push(p);
-              break;
+            groups[i].projects.push(p);
+            break;
           }
         }
       }
@@ -161,7 +182,7 @@ var AllProjectsPage = React.createClass({
             <SectionHeader className="marginTopL">
               {groups[i].header}
             </SectionHeader>
-            <div className='bluishGray'>
+            <div className="bluishGray">
               {this.renderProjectList(groups[i].projects)}
             </div>
           </span>
@@ -169,9 +190,11 @@ var AllProjectsPage = React.createClass({
       }
     }
 
-    return <div>
-      {staleContent}
-    </div>;
+    return (
+      <div>
+        {staleContent}
+      </div>
+    );
   },
 
   renderProjectList: function(projects_data) {
@@ -180,22 +203,16 @@ var AllProjectsPage = React.createClass({
     }
 
     var grid_data = _.map(projects_data, p => {
-      var widget = null, build_time = null;
+      var widget = null,
+        build_time = null;
       if (p.lastBuild) {
         var build = p.lastBuild;
 
         widget = <SingleBuildStatus build={build} parentElem={this} />;
-        build_time = <TimeText
-          time={build.dateFinished || build.dateCreated}
-        />;
+        build_time = <TimeText time={build.dateFinished || build.dateCreated} />;
       }
 
-      return [
-        widget,
-        build_time,
-        ChangesLinks.project(p),
-        p.options["project.notes"]
-      ];
+      return [widget, build_time, ChangesLinks.project(p), p.options['project.notes']];
     });
 
     var headers = [
@@ -205,19 +222,11 @@ var AllProjectsPage = React.createClass({
       'Description'
     ];
 
-    var cellClasses = [
-      'buildWidgetCell',
-      'nowrap',
-      'leftBarrier nowrap',
-      'cellOverflow'
-    ];
+    var cellClasses = ['buildWidgetCell', 'nowrap', 'leftBarrier nowrap', 'cellOverflow'];
 
-    return <Grid
-      colnum={4}
-      data={grid_data}
-      headers={headers}
-      cellClasses={cellClasses}
-    />;
+    return (
+      <Grid colnum={4} data={grid_data} headers={headers} cellClasses={cellClasses} />
+    );
   },
 
   /*
@@ -232,27 +241,36 @@ var AllProjectsPage = React.createClass({
       if (repo_projects.length > 1) {
         repo_name += ` (${repo_projects.length})`; // add # of projects
       }
-      var repo_markup = <div>
-        <span className="lb">{repo_name}</span>
-        <div className="subText">{repo_url}</div>
-      </div>;
+      var repo_markup = (
+        <div>
+          <span className="lb">
+            {repo_name}
+          </span>
+          <div className="subText">
+            {repo_url}
+          </div>
+        </div>
+      );
 
       var repo_rows = _.map(repo_projects, (p, index) => {
-        var triggers = "Never";
-        if (p.options["phabricator.diff-trigger"] === "1" &&
-            p.options["build.commit-trigger"] === "1") {
-          triggers = "Diffs and Commits";
-        } else if (p.options["phabricator.diff-trigger"] === "1") {
-          triggers = "Only Diffs";
-        } else if (p.options["build.commit-trigger"] === "1") {
-          triggers = "Only Commits";
+        var triggers = 'Never';
+        if (
+          p.options['phabricator.diff-trigger'] === '1' &&
+          p.options['build.commit-trigger'] === '1'
+        ) {
+          triggers = 'Diffs and Commits';
+        } else if (p.options['phabricator.diff-trigger'] === '1') {
+          triggers = 'Only Diffs';
+        } else if (p.options['build.commit-trigger'] === '1') {
+          triggers = 'Only Commits';
         }
 
-        var whitelist = "";
+        var whitelist = '';
         if (p.options['build.file-whitelist']) {
-          whitelist = _.map(
-            utils.split_lines(p.options['build.file-whitelist']),
-            l => <div>{l}</div>
+          whitelist = _.map(utils.split_lines(p.options['build.file-whitelist']), l =>
+            <div>
+              {l}
+            </div>
           );
         }
 
@@ -268,17 +286,21 @@ var AllProjectsPage = React.createClass({
       rows = rows.concat(repo_rows);
     });
 
-    var headers = ['Repo', 'Project', 'Builds for', 'With branches', 'With paths', 'Created'];
+    var headers = [
+      'Repo',
+      'Project',
+      'Builds for',
+      'With branches',
+      'With paths',
+      'Created'
+    ];
     var cellClasses = ['nowrap', 'nowrap', 'nowrap', 'nowrap', 'wide', 'nowrap'];
 
-    return <div className="marginBottomL">
-      <Grid
-        colnum={6}
-        data={rows}
-        headers={headers}
-        cellClasses={cellClasses}
-      />
-    </div>;
+    return (
+      <div className="marginBottomL">
+        <Grid colnum={6} data={rows} headers={headers} cellClasses={cellClasses} />
+      </div>
+    );
   },
 
   /*
@@ -289,11 +311,19 @@ var AllProjectsPage = React.createClass({
     _.each(projects_data, proj => {
       var num_plans = proj.plans.length;
       _.each(proj.plans, (plan, index) => {
-        var proj_name = "";
+        var proj_name = '';
         if (index === 0) {
-          var proj_name = (num_plans > 1) ?
-            <span className="lb">{proj.name}{" ("}{num_plans}{")"}</span> :
-            <span className="lb">{proj.name}</span>;
+          var proj_name =
+            num_plans > 1
+              ? <span className="lb">
+                  {proj.name}
+                  {' ('}
+                  {num_plans}
+                  {')'}
+                </span>
+              : <span className="lb">
+                  {proj.name}
+                </span>;
         }
 
         if (!plan.steps[0]) {
@@ -308,7 +338,9 @@ var AllProjectsPage = React.createClass({
           rows.push([
             proj_name,
             plan.name,
-            <span className="marginRightL">{this.getStepType(plan.steps[0])}</span>,
+            <span className="marginRightL">
+              {this.getStepType(plan.steps[0])}
+            </span>,
             this.getSeeConfigLink(plan.id, 'plans'),
             <TimeText time={plan.dateModified} />
           ]);
@@ -321,36 +353,34 @@ var AllProjectsPage = React.createClass({
     });
 
     // TODO: snapshot config?
-    var more_link = <span>More{" "}
-      <span style={{fontWeight: 'normal'}}>
-        {"("}{this.getExpandAllLink('plans')}{")"}
+    var more_link = (
+      <span>
+        More{' '}
+        <span style={{fontWeight: 'normal'}}>
+          {'('}
+          {this.getExpandAllLink('plans')}
+          {')'}
+        </span>
       </span>
-    </span>;
+    );
     var headers = ['Project', 'Plan', 'Implementation', more_link, 'Modified'];
     var cellClasses = ['nowrap', 'nowrap', 'nowrap', 'wide', 'nowrap'];
 
-    return <Grid
-      colnum={5}
-      data={rows}
-      headers={headers}
-      cellClasses={cellClasses}
-    />;
+    return <Grid colnum={5} data={rows} headers={headers} cellClasses={cellClasses} />;
   },
 
   /*
    * Clusters build plans by type
    */
   renderPlansByType: function(projects_data) {
-    var every_plan = _.flatten(
-      _.map(projects_data, p => p.plans)
-    );
+    var every_plan = _.flatten(_.map(projects_data, p => p.plans));
 
     var every_plan_type = _.chain(every_plan)
-      .map(p => p.steps.length > 0 ? this.getStepType(p.steps[0]) : "")
+      .map(p => (p.steps.length > 0 ? this.getStepType(p.steps[0]) : ''))
       .compact()
       .uniq()
       // sort, hoisting build types starting with [LXC] to the top
-      .sortBy(t => t.charAt(0) === "[" ? "0" + t : t)
+      .sortBy(t => (t.charAt(0) === '[' ? '0' + t : t))
       .value();
 
     var rows_lists = [];
@@ -374,33 +404,35 @@ var AllProjectsPage = React.createClass({
         });
       });
       // add plan type label to first row
-      plan_rows[0][0] = <span className="lb">
-        {[type, " (", plan_rows.length, ")"]}
-      </span>;
+      plan_rows[0][0] = (
+        <span className="lb">
+          {[type, ' (', plan_rows.length, ')']}
+        </span>
+      );
       rows_lists.push(plan_rows);
     });
 
     var headers = ['Infrastructure', 'Project Name', 'Plan Name', 'More'];
     var cellClasses = ['nowrap', 'nowrap', 'nowrap', 'nowrap'];
 
-    return <Grid
-      colnum={4}
-      data={_.flatten(rows_lists, true)}
-      headers={headers}
-      cellClasses={cellClasses}
-     />;
+    return (
+      <Grid
+        colnum={4}
+        data={_.flatten(rows_lists, true)}
+        headers={headers}
+        cellClasses={cellClasses}
+      />
+    );
   },
 
   /*
    * Group build plans by cluster
    */
   renderPlansByCluster: function(projects_data) {
-    var every_plan = _.flatten(
-      _.map(projects_data, p => p.plans)
-    );
+    var every_plan = _.flatten(_.map(projects_data, p => p.plans));
 
     var every_plan_type = _.chain(every_plan)
-      .map(p => p.steps.length > 0 ? this.getStepCluster(p.steps[0]) : "")
+      .map(p => (p.steps.length > 0 ? this.getStepCluster(p.steps[0]) : ''))
       .compact()
       .uniq()
       .sort()
@@ -429,21 +461,25 @@ var AllProjectsPage = React.createClass({
         });
       });
       // add cluster label to first row
-      plan_rows[0][0] = <span className="lb">
-        {type} <span style={{color: 'gray'}}>({plan_count})</span>
-      </span>;
+      plan_rows[0][0] = (
+        <span className="lb">
+          {type} <span style={{color: 'gray'}}>({plan_count})</span>
+        </span>
+      );
       rows_lists.push(plan_rows);
     });
 
     var headers = ['Cluster', 'Project Name', 'Plan Name', 'More'];
     var cellClasses = ['nowrap', 'nowrap', 'nowrap', 'nowrap'];
 
-    return <Grid
-      colnum={4}
-      data={_.flatten(rows_lists, true)}
-      headers={headers}
-      cellClasses={cellClasses}
-     />;
+    return (
+      <Grid
+        colnum={4}
+        data={_.flatten(rows_lists, true)}
+        headers={headers}
+        cellClasses={cellClasses}
+      />
+    );
   },
 
   renderJenkinsPlansByMaster: function(projects_data, blacklist, user) {
@@ -459,7 +495,9 @@ var AllProjectsPage = React.createClass({
         plan.project = proj;
 
         // is there a plan?
-        if (!plan.steps[0]) { return; }
+        if (!plan.steps[0]) {
+          return;
+        }
         // is it a jenkins plan?
         if (plan.steps[0].name.toLowerCase().indexOf('jenkins') === -1) {
           return;
@@ -486,8 +524,7 @@ var AllProjectsPage = React.createClass({
       });
     });
 
-    var split_urls_for_display = utils.split_start_and_end(
-      _.keys(plans_by_master));
+    var split_urls_for_display = utils.split_start_and_end(_.keys(plans_by_master));
 
     var rows = [];
     _.each(_.keys(plans_by_master).sort(), url => {
@@ -497,32 +534,41 @@ var AllProjectsPage = React.createClass({
 
       var is_first_row = true;
       var in_blacklist = _.contains(blacklist, url);
-      var params = {'master_url': url};
-      if (in_blacklist)
-        params['remove'] = "1";
+      var params = {master_url: url};
+      if (in_blacklist) params['remove'] = '1';
 
       var checkbox = <input type="checkbox" checked={in_blacklist ? 1 : 0} disabled />;
       if (user.isAdmin)
-        checkbox = <input type="checkbox" checked={in_blacklist ? 1 : 0}/>;
+        checkbox = <input type="checkbox" checked={in_blacklist ? 1 : 0} />;
 
-      var checkbox_name = "toggle_blacklist_" + url;
-      var toggleDisable = <Request
+      var checkbox_name = 'toggle_blacklist_' + url;
+      var toggleDisable = (
+        <Request
           parentElem={this}
           name={checkbox_name}
           method="post"
           endpoint={`/api/0/jenkins_master_blacklist/`}
           params={params}>
           {checkbox}
-        </Request>;
+        </Request>
+      );
 
-      var first_row_text = <span className="paddingRightM">
-        <a className="subtle" href={url} target="_blank">
-          {split_urls_for_display[url][0]}
-          <b>{split_urls_for_display[url][1]}</b>
-          {split_urls_for_display[url][2]}
-        </a>
-        {" ("}{val.master.length}{"/"}{val.diff.length}{")"}
-      </span>;
+      var first_row_text = (
+        <span className="paddingRightM">
+          <a className="subtle" href={url} target="_blank">
+            {split_urls_for_display[url][0]}
+            <b>
+              {split_urls_for_display[url][1]}
+            </b>
+            {split_urls_for_display[url][2]}
+          </a>
+          {' ('}
+          {val.master.length}
+          {'/'}
+          {val.diff.length}
+          {')'}
+        </span>
+      );
 
       _.each(val.master, (plan, index) => {
         rows.push([
@@ -552,7 +598,7 @@ var AllProjectsPage = React.createClass({
     var headers = [
       'Disabled',
       <span>
-        Master{" "}
+        Master{' '}
         <SimpleTooltip label="You may need special permissions to view the Jenkins pages">
           <i className="fa fa-lock" />
         </SimpleTooltip>
@@ -565,14 +611,11 @@ var AllProjectsPage = React.createClass({
 
     var cellClasses = ['nowrap', 'nowrap', 'nowrap', 'nowrap', 'wide', 'nowrap'];
 
-    return <div>
-      <Grid
-        colnum={6}
-        data={rows}
-        headers={headers}
-        cellClasses={cellClasses}
-      />
-    </div>;
+    return (
+      <div>
+        <Grid colnum={6} data={rows} headers={headers} cellClasses={cellClasses} />
+      </div>
+    );
   },
 
   getSeeConfigLink: function(plan_id, chart_name) {
@@ -583,13 +626,17 @@ var AllProjectsPage = React.createClass({
         utils.update_key_in_state_dict(
           state_key,
           plan_id,
-          !this.state[state_key][plan_id])
+          !this.state[state_key][plan_id]
+        )
       );
-    }
+    };
 
-    var text = this.state[state_key][plan_id] ?
-      'Hide Config' : 'See Config';
-    return <a onClick={onClick}>{text}</a>;
+    var text = this.state[state_key][plan_id] ? 'Hide Config' : 'See Config';
+    return (
+      <a onClick={onClick}>
+        {text}
+      </a>
+    );
   },
 
   getExpandAllLink: function(chart_name) {
@@ -598,18 +645,19 @@ var AllProjectsPage = React.createClass({
     var onClick = ___ => {
       if (this.state[state_key]['all']) {
         // delete all variables that expand a config
-        this.setState({ [ state_key ]: {}});
+        this.setState({[state_key]: {}});
       } else {
-        this.setState(
-          utils.update_key_in_state_dict(state_key, 'all', true)
-        );
+        this.setState(utils.update_key_in_state_dict(state_key, 'all', true));
       }
     };
 
-    var text = this.state[state_key]['all'] ?
-      'Collapse All' : 'Expand All';
+    var text = this.state[state_key]['all'] ? 'Collapse All' : 'Expand All';
 
-    return <a onClick={onClick}>{text}</a>;
+    return (
+      <a onClick={onClick}>
+        {text}
+      </a>
+    );
   },
 
   isConfigExpanded: function(plan_id, chart_name) {
@@ -620,24 +668,26 @@ var AllProjectsPage = React.createClass({
 
   getConfigStateKey: function(chart_name) {
     switch (chart_name) {
-      case 'plans': return 'expandedConfigsInPlans';
-      case 'plansByType': return 'expandedConfigsInPlansByType';
-      case 'plansByCluster': return 'expandedConfigsInPlansByCluster';
-      default: throw `unknown chart name ${chart_name}`;
-    };
+      case 'plans':
+        return 'expandedConfigsInPlans';
+      case 'plansByType':
+        return 'expandedConfigsInPlansByType';
+      case 'plansByCluster':
+        return 'expandedConfigsInPlansByCluster';
+      default:
+        throw `unknown chart name ${chart_name}`;
+    }
   },
 
   getExpandedConfigRow: function(plan) {
     var build_timeout = plan.steps[0].options['build.timeout'];
     var build_timeout_markup = null;
     if (build_timeout !== undefined) {
-      build_timeout_markup = [
-        <span className="lb">Build Timeout: </span>,
-        build_timeout
-      ];
+      build_timeout_markup = [<span className="lb">Build Timeout: </span>, build_timeout];
     }
 
-    return GridRow.oneItem(null,
+    return GridRow.oneItem(
+      null,
       <div>
         <pre className="defaultPre">
           {plan.steps[0] && plan.steps[0].data}
@@ -649,24 +699,21 @@ var AllProjectsPage = React.createClass({
 
   getStepCluster: function(step) {
     var data = JSON.parse(step.data);
-    return data["cluster"] || "Default";
+    return data['cluster'] || 'Default';
   },
 
   getStepType: function(step) {
     var is_lxc = false;
     _.each(utils.split_lines(step.data), line => {
       // look for a "build_type": "lxc" line
-      if (line.indexOf("build_type") >= 0 && line.indexOf("lxc") >= 0) {
+      if (line.indexOf('build_type') >= 0 && line.indexOf('lxc') >= 0) {
         is_lxc = true;
       }
     });
 
-    var is_jenkins_lxc = is_lxc && step.name.indexOf("Jenkins") >= 0;
-    return is_jenkins_lxc ?
-      "[LXC] " + step.name :
-      step.name;
+    var is_jenkins_lxc = is_lxc && step.name.indexOf('Jenkins') >= 0;
+    return is_jenkins_lxc ? '[LXC] ' + step.name : step.name;
   }
-
 });
 
 export default AllProjectsPage;

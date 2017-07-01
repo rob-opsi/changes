@@ -1,6 +1,6 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import Examples from 'es6!display/examples';
+import Examples from 'display/examples';
 
 // Some playful loading messages
 var loading_messages = [
@@ -12,7 +12,7 @@ var loading_messages = [
   "I'm a happy loading message! \\(^o^)/",
   'Mining bitcoi^W^WLoading Changes. Hang tight',
   'Reticulating splines...',
-  'Grab a snickers.',
+  'Grab a snickers.'
 ];
 
 /*
@@ -20,7 +20,7 @@ var loading_messages = [
  * random, it will change every time the state of the parent component changes!
  * Which I actually like, since its a natural way to show progress.
  */
-export var RandomLoadingMessage = React.createClass({
+export const RandomLoadingMessage = React.createClass({
   propTypes: {
     display: PropTypes.oneOf(['inline', 'block', 'inlineBlock'])
 
@@ -29,48 +29,46 @@ export var RandomLoadingMessage = React.createClass({
   },
 
   getDefaultProps: function() {
-    return { display: "block" };
+    return {display: 'block'};
   },
 
   render: function() {
-    var { className, ...props} = this.props;
+    var {className, ...props} = this.props;
 
-    if (this.props.display === 'inline' ||
-        this.props.display === 'inlineBlock') {
-      className = (className || "") + " " + this.props.display;
+    if (this.props.display === 'inline' || this.props.display === 'inlineBlock') {
+      className = (className || '') + ' ' + this.props.display;
     }
 
-    return <div {...props} className={className}>
-      {_.sample(loading_messages)}
-    </div>;
+    return (
+      <div {...props} className={className}>
+        {_.sample(loading_messages)}
+      </div>
+    );
   }
 });
 
 /*
  * When you have a part of the page that hasn't yet loaded, show a loading box.
  */
-export var InlineLoading = React.createClass({
-
+export const InlineLoading = React.createClass({
   propTypes: {
     // ...
     // transfers all properties to rendered <div />
   },
 
   render: function() {
-    var { className, ...props} = this.props;
-    className = (className || "") + " inlineLoading nonFixedClass";
+    var {className, ...props} = this.props;
+    className = (className || '') + ' inlineLoading nonFixedClass';
 
-    return <div {...props} className={className}>
-      <i className="fa fa-spinner fa-spin marginRightS" />
-      {_.sample(loading_messages)}
-    </div>;
-  },
+    return (
+      <div {...props} className={className}>
+        <i className="fa fa-spinner fa-spin marginRightS" />
+        {_.sample(loading_messages)}
+      </div>
+    );
+  }
 });
 
-Examples.add("Loading Messages", __ => {
-  return [
-    <RandomLoadingMessage />,
-    <RandomLoadingMessage />,
-    <InlineLoading />
-  ];
+Examples.add('Loading Messages', __ => {
+  return [<RandomLoadingMessage />, <RandomLoadingMessage />, <InlineLoading />];
 });

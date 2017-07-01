@@ -1,22 +1,21 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import APINotLoaded from 'es6!display/not_loaded';
-import ChangesLinks from 'es6!display/changes/links';
-import { AjaxError } from 'es6!display/errors';
-import { ChangesChart } from 'es6!display/changes/charts';
-import { Grid, GridRow } from 'es6!display/grid';
-import { Menu1 } from 'es6!display/menus';
-import { SingleBuildStatus } from 'es6!display/changes/builds';
-import { TimeText, display_duration } from 'es6!display/time';
-import { get_build_cause } from 'es6!display/changes/build_text';
-import { get_runnable_condition, is_waiting } from 'es6!display/changes/build_conditions';
+import APINotLoaded from 'display/not_loaded';
+import ChangesLinks from 'display/changes/links';
+import {AjaxError} from 'display/errors';
+import {ChangesChart} from 'display/changes/charts';
+import {Grid, GridRow} from 'display/grid';
+import {Menu1} from 'display/menus';
+import {SingleBuildStatus} from 'display/changes/builds';
+import {TimeText, display_duration} from 'display/time';
+import {get_build_cause} from 'display/changes/build_text';
+import {get_runnable_condition, is_waiting} from 'display/changes/build_conditions';
 
-import InteractiveData from 'es6!pages/helpers/interactive_data';
+import InteractiveData from 'pages/helpers/interactive_data';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
 var BuildsTab = React.createClass({
-
   propTypes: {
     // the project api response
     project: PropTypes.object,
@@ -29,7 +28,7 @@ var BuildsTab = React.createClass({
     interactive: PropTypes.object,
 
     // parent elem that has state
-    pageElem: PropTypes.object.isRequired,
+    pageElem: PropTypes.object.isRequired
   },
 
   statics: {
@@ -44,7 +43,9 @@ var BuildsTab = React.createClass({
 
   componentDidMount: function() {
     if (!this.props.interactive.hasRunInitialize()) {
-      var params = this.props.isInitialTab ? InteractiveData.getParamsFromWindowUrl() : null;
+      var params = this.props.isInitialTab
+        ? InteractiveData.getParamsFromWindowUrl()
+        : null;
       params = params || {};
 
       this.props.interactive.initialize(params || {});
@@ -69,23 +70,25 @@ var BuildsTab = React.createClass({
     var links = this.props.interactive.getPagingLinks({type: 'chart_paging'});
     var prevLink = interactive.hasPreviousPage() ? links[0] : '';
     var nextLink = interactive.hasNextPage() ? links[1] : '';
-    var chart = <div className="buildsChart">
-      {prevLink}
-      <ChangesChart
-        type="build"
-        className="marginRightS inlineBlock"
-        runnables={data_to_show.getReturnedData()}
-        enableLatest={!interactive.hasPreviousPage()}
-      />
-      {nextLink}
-    </div>;
+    var chart = (
+      <div className="buildsChart">
+        {prevLink}
+        <ChangesChart
+          type="build"
+          className="marginRightS inlineBlock"
+          runnables={data_to_show.getReturnedData()}
+          enableLatest={!interactive.hasPreviousPage()}
+        />
+        {nextLink}
+      </div>
+    );
 
     var data = _.map(data_to_show.getReturnedData(), build => {
       var target = ChangesLinks.phab(build);
 
-      var duration = !is_waiting(get_runnable_condition(build)) ?
-        display_duration(build.duration / 1000) :
-        null;
+      var duration = !is_waiting(get_runnable_condition(build))
+        ? display_duration(build.duration / 1000)
+        : null;
 
       var tests = build.stats.test_count;
 
@@ -127,27 +130,26 @@ var BuildsTab = React.createClass({
 
     var error_message = null;
     if (interactive.failedToLoadUpdatedData()) {
-      error_message = <AjaxError response={interactive.getDataForErrorMessage().response} />;
+      error_message = (
+        <AjaxError response={interactive.getDataForErrorMessage().response} />
+      );
     }
 
     var style = interactive.isLoadingUpdatedData() ? {opacity: 0.5} : null;
 
-    return <div>
-      <div style={style}>
-        <div className="floatR">
-          {chart}
+    return (
+      <div>
+        <div style={style}>
+          <div className="floatR">
+            {chart}
+          </div>
+          {this.renderControls()}
+          {error_message}
+          <Grid colnum={8} cellClasses={cellClasses} data={data} headers={headers} />
         </div>
-        {this.renderControls()}
-        {error_message}
-        <Grid
-          colnum={8}
-          cellClasses={cellClasses}
-          data={data}
-          headers={headers}
-        />
+        {this.renderPaging()}
       </div>
-      {this.renderPaging()}
-    </div>;
+    );
   },
 
   renderControls: function(commits) {
@@ -160,25 +162,25 @@ var BuildsTab = React.createClass({
     ];
 
     var params_for_items = {
-      'All': {
-        'patches_only': null,
-        'tag': null,
+      All: {
+        patches_only: null,
+        tag: null
       },
       'Commits Only': {
-        'patches_only': null,
-        'tag': 'commit',
+        patches_only: null,
+        tag: 'commit'
       },
       'Commit Queue Only': {
-        'patches_only': null,
-        'tag': 'commit-queue',
+        patches_only: null,
+        tag: 'commit-queue'
       },
       'Diffs/arc test only': {
-        'patches_only': 1,
-        'tag': null,
+        patches_only: 1,
+        tag: null
       },
       'Snapshot only': {
-        'patches_only': null,
-        'tag': ['snapshot', 'test-snapshot'],
+        patches_only: null,
+        tag: ['snapshot', 'test-snapshot']
       }
     };
 
@@ -186,8 +188,8 @@ var BuildsTab = React.createClass({
     var selected_item = items[0];
     _.each(params_for_items, (params, item) => {
       var is_selected = true;
-      _.each(params, (v,k) => {
-        if (current_params[k]+"" !== v+"") {
+      _.each(params, (v, k) => {
+        if (current_params[k] + '' !== v + '') {
           is_selected = false;
         }
       });
@@ -196,20 +198,27 @@ var BuildsTab = React.createClass({
       }
     });
 
-    var onclick = item => this.props.interactive.updateWithParams(params_for_items[item], true);
+    var onclick = item =>
+      this.props.interactive.updateWithParams(params_for_items[item], true);
 
-    return <Menu1
-      className="marginBottomS buildsControls"
-      items={items}
-      selectedItem={selected_item}
-      onClick={onclick}
-    />;
+    return (
+      <Menu1
+        className="marginBottomS buildsControls"
+        items={items}
+        selectedItem={selected_item}
+        onClick={onclick}
+      />
+    );
   },
 
   renderPaging: function(commits) {
     var links = this.props.interactive.getPagingLinks();
-    return <div className="marginTopM marginBottomM">{links}</div>;
-  },
+    return (
+      <div className="marginTopM marginBottomM">
+        {links}
+      </div>
+    );
+  }
 });
 
 export default BuildsTab;

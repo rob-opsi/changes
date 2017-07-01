@@ -1,32 +1,34 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
+import URI from 'urijs';
 
-import APINotLoaded from 'es6!display/not_loaded';
-import ChangesLinks from 'es6!display/changes/links';
-import SimpleTooltip from 'es6!display/simple_tooltip';
-import { AjaxError } from 'es6!display/errors';
-import { ChangesChart } from 'es6!display/changes/charts';
-import { Grid } from 'es6!display/grid';
-import { MissingBuildStatus, SingleBuildStatus } from 'es6!display/changes/builds';
-import { TimeText, display_duration } from 'es6!display/time';
-import { convert_status_and_result_to_condition, get_runnable_condition,
-         get_runnable_condition_short_text, is_waiting,
-         ConditionDot,
-       } from 'es6!display/changes/build_conditions';
+import APINotLoaded from 'display/not_loaded';
+import ChangesLinks from 'display/changes/links';
+import SimpleTooltip from 'display/simple_tooltip';
+import {AjaxError} from 'display/errors';
+import {ChangesChart} from 'display/changes/charts';
+import {Grid} from 'display/grid';
+import {MissingBuildStatus, SingleBuildStatus} from 'display/changes/builds';
+import {TimeText, display_duration} from 'display/time';
+import {
+  convert_status_and_result_to_condition,
+  get_runnable_condition,
+  get_runnable_condition_short_text,
+  is_waiting,
+  ConditionDot
+} from 'display/changes/build_conditions';
 
-import InteractiveData from 'es6!pages/helpers/interactive_data';
+import InteractiveData from 'pages/helpers/interactive_data';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
-import * as utils from 'es6!utils/utils';
-
+import * as utils from 'utils/utils';
 
 function getSkipReason(message) {
-    let m = message.match(/^Queue skipped: (.*)$/m);
-    return m && m[1];
+  let m = message.match(/^Queue skipped: (.*)$/m);
+  return m && m[1];
 }
 
 var CommitsTab = React.createClass({
-
   propTypes: {
     // the project api response. Always loaded
     project: PropTypes.object,
@@ -35,7 +37,7 @@ var CommitsTab = React.createClass({
     interactive: PropTypes.object,
 
     // parent elem that has state
-    pageElem: PropTypes.object.isRequired,
+    pageElem: PropTypes.object.isRequired
   },
 
   getInitialState: function() {
@@ -45,18 +47,19 @@ var CommitsTab = React.createClass({
   statics: {
     getEndpoint: function(project_slug) {
       return URI(`/api/0/projects/${project_slug}/commits/`)
-        .query({ 'all_builds': 1 })
+        .query({all_builds: 1})
         .toString();
     }
   },
 
   componentDidMount: function() {
     if (!this.props.interactive.hasRunInitialize()) {
-      var params = this.props.isInitialTab ? InteractiveData.getParamsFromWindowUrl() : null;
+      var params = this.props.isInitialTab
+        ? InteractiveData.getParamsFromWindowUrl()
+        : null;
       params = params || {};
       if (!params['branch']) {
-        params['branch'] = this.props.project.getReturnedData()
-          .repository.defaultBranch;
+        params['branch'] = this.props.project.getReturnedData().repository.defaultBranch;
       }
 
       this.props.interactive.initialize(params || {});
@@ -70,10 +73,7 @@ var CommitsTab = React.createClass({
 
     // TODO: maybe store this in parent state
     var repo_id = this.props.project.getReturnedData().repository.id;
-    api.fetch(
-      this,
-      { 'branches': `/api/0/repositories/${repo_id}/branches` }
-    );
+    api.fetch(this, {branches: `/api/0/repositories/${repo_id}/branches`});
   },
 
   render: function() {
@@ -86,28 +86,34 @@ var CommitsTab = React.createClass({
     // we might be in the middle of / failed to load updated data
     var error_message = null;
     if (interactive.failedToLoadUpdatedData()) {
-      error_message = <AjaxError response={interactive.getDataForErrorMessage().response} />;
+      error_message = (
+        <AjaxError response={interactive.getDataForErrorMessage().response} />
+      );
     }
 
     var style = interactive.isLoadingUpdatedData() ? {opacity: 0.5} : null;
 
-    return <div style={style}>
-      <div className="floatR">
-        {this.renderChart()}
+    return (
+      <div style={style}>
+        <div className="floatR">
+          {this.renderChart()}
+        </div>
+        {this.renderTableControls()}
+        {error_message}
+        {this.renderTable()}
+        {this.renderPaging()}
       </div>
-      {this.renderTableControls()}
-      {error_message}
-      {this.renderTable()}
-      {this.renderPaging()}
-    </div>;
+    );
   },
 
   renderTableControls() {
-    var default_branch = this.props.project.getReturnedData()
-      .repository.defaultBranch;
+    var default_branch = this.props.project.getReturnedData().repository.defaultBranch;
     var current_params = this.props.interactive.getCurrentParams();
     let branchNames = null;
-    if (api.isError(this.state.branches) && this.state.branches.getStatusCode() === '422') {
+    if (
+      api.isError(this.state.branches) &&
+      this.state.branches.getStatusCode() === '422'
+    ) {
       branchNames = [];
     } else if (!api.isLoaded(this.state.branches)) {
       branchNames = null;
@@ -115,14 +121,18 @@ var CommitsTab = React.createClass({
       branchNames = _.chain(this.state.branches.getReturnedData()).pluck('name').value();
     }
     let onBranchChange = evt => {
-        this.props.interactive.updateWithParams({branch: evt.target.value}, true);
+      this.props.interactive.updateWithParams({branch: evt.target.value}, true);
     };
-    return <div className="commitsControls">
-             <BranchDropdown defaultBranch={default_branch}
-                             currentBranch={current_params.branch}
-                             branchNames={branchNames}
-                             onBranchChange={onBranchChange} />
-           </div>;
+    return (
+      <div className="commitsControls">
+        <BranchDropdown
+          defaultBranch={default_branch}
+          currentBranch={current_params.branch}
+          branchNames={branchNames}
+          onBranchChange={onBranchChange}
+        />
+      </div>
+    );
   },
 
   renderChart() {
@@ -142,16 +152,18 @@ var CommitsTab = React.createClass({
     var prevLink = interactive.hasPreviousPage() ? links[0] : '';
     var nextLink = interactive.hasNextPage() ? links[1] : '';
 
-    return <div className="commitsChart">
-      {prevLink}
-      <ChangesChart
-        type="build"
-        className="inlineBlock"
-        runnables={builds}
-        enableLatest={!interactive.hasPreviousPage()}
-      />
-      {nextLink}
-    </div>;
+    return (
+      <div className="commitsChart">
+        {prevLink}
+        <ChangesChart
+          type="build"
+          className="inlineBlock"
+          runnables={builds}
+          enableLatest={!interactive.hasPreviousPage()}
+        />
+        {nextLink}
+      </div>
+    );
   },
 
   renderTable: function() {
@@ -203,65 +215,83 @@ var CommitsTab = React.createClass({
       ];
     }
 
-    return <Grid
-      colnum={headers.length}
-      data={grid_data}
-      cellClasses={cellClasses}
-      headers={headers}
-    />;
+    return (
+      <Grid
+        colnum={headers.length}
+        data={grid_data}
+        cellClasses={cellClasses}
+        headers={headers}
+      />
+    );
   },
 
   turnIntoRow: function(c, project_info) {
     var title = utils.truncate(utils.first_line(c.message));
-    if (c.message.indexOf("!!skipthequeue") !== -1 ||
-        c.message.indexOf("#skipthequeue") !== -1) { // we used to use this
+    if (
+      c.message.indexOf('!!skipthequeue') !== -1 ||
+      c.message.indexOf('#skipthequeue') !== -1
+    ) {
+      // we used to use this
 
       // dropbox-specific logic: we have a commit queue (oh hey, you should
       // build one of those too)
 
-      let label = "This commit bypassed the commit queue";
+      let label = 'This commit bypassed the commit queue';
       let skipreason = getSkipReason(c.message);
       if (skipreason) {
-        label = <div>{label}<br/>Reason given: {skipreason}</div>;
+        label = (
+          <div>
+            {label}
+            <br />Reason given: {skipreason}
+          </div>
+        );
       }
-      title = <span>
-        {title}
-        <SimpleTooltip label={label}>
-          <i className="fa fa-fast-forward blue marginLeftS" />
-        </SimpleTooltip>
-      </span>;
+      title = (
+        <span>
+          {title}
+          <SimpleTooltip label={label}>
+            <i className="fa fa-fast-forward blue marginLeftS" />
+          </SimpleTooltip>
+        </span>
+      );
     }
 
-    var build_widget = null, duration = null, tests = null;
+    var build_widget = null,
+      duration = null,
+      tests = null;
     if (c.builds && c.builds.length > 0) {
       var sorted_builds = _.sortBy(c.builds, b => b.dateCreated).reverse();
       var last_build = _.first(sorted_builds);
 
-      build_widget = <SingleBuildStatus
-        build={last_build}
-        parentElem={this}
-      />;
+      build_widget = <SingleBuildStatus build={last_build} parentElem={this} />;
 
-      duration = !is_waiting(get_runnable_condition(last_build)) ?
-        display_duration(last_build.duration / 1000) :
-        null;
+      duration = !is_waiting(get_runnable_condition(last_build))
+        ? display_duration(last_build.duration / 1000)
+        : null;
 
       tests = last_build.stats.test_count;
 
-      title = <a className="subtle" href={ChangesLinks.buildHref(last_build)}>
-        {title}
-      </a>;
+      title = (
+        <a className="subtle" href={ChangesLinks.buildHref(last_build)}>
+          {title}
+        </a>
+      );
     } else {
-      build_widget = <MissingBuildStatus
+      build_widget = (
+        <MissingBuildStatus
           project_slug={project_info.slug}
           commit_sha={c.sha}
           parentElem={this}
           selectiveTesting={project_info.containsActiveAutogeneratedPlan}
-      />
+        />
+      );
     }
 
-    let revisionResultId = c.revisionResult ? c.revisionResult.result.id : "unknown";
-    let revisionCondition = convert_status_and_result_to_condition(c.status, revisionResultId)
+    let revisionResultId = c.revisionResult ? c.revisionResult.result.id : 'unknown';
+    let revisionCondition = convert_status_and_result_to_condition(
+      c.status,
+      revisionResultId
+    );
     let label = get_runnable_condition_short_text(revisionCondition);
     // TODO: if there are any comments, show a comment icon on the right
     let row = [
@@ -274,9 +304,13 @@ var CommitsTab = React.createClass({
       <TimeText key={c.id} time={c.dateCommitted} />
     ];
     if (project_info.containsActiveAutogeneratedPlan) {
-      let markup = <SimpleTooltip label={label} placement="right">
-        <span><ConditionDot condition={revisionCondition} /></span>
-      </SimpleTooltip>;
+      let markup = (
+        <SimpleTooltip label={label} placement="right">
+          <span>
+            <ConditionDot condition={revisionCondition} />
+          </span>
+        </SimpleTooltip>
+      );
       row.unshift(markup);
     }
     return row;
@@ -284,41 +318,58 @@ var CommitsTab = React.createClass({
 
   renderPaging: function() {
     var links = this.props.interactive.getPagingLinks();
-    return <div className="marginBottomM marginTopM">{links}</div>;
-  },
+    return (
+      <div className="marginBottomM marginTopM">
+        {links}
+      </div>
+    );
+  }
 });
-
 
 const BranchDropdown = ({defaultBranch, currentBranch, branchNames, onBranchChange}) => {
   let current_branch = currentBranch || defaultBranch;
   let branch_dropdown = null;
   if (!branchNames) {
-    branch_dropdown = <select disabled={true}>
-                        <option value={current_branch}>{current_branch}</option>
-                      </select>;
+    branch_dropdown = (
+      <select disabled={true}>
+        <option value={current_branch}>
+          {current_branch}
+        </option>
+      </select>
+    );
   } else if (branchNames.length == 0) {
-    branch_dropdown = <select disabled={true}>
-                        <option>No branches</option>
-                      </select>;
+    branch_dropdown = (
+      <select disabled={true}>
+        <option>No branches</option>
+      </select>
+    );
   } else {
     let options = _.chain(branchNames)
       .sortBy(_.identity)
-      .map(n => <option value={n} key={n}>{n}</option>)
+      .map(n =>
+        <option value={n} key={n}>
+          {n}
+        </option>
+      )
       .value();
-    branch_dropdown = <select onChange={onBranchChange} value={current_branch}>
-                        {options}
-                      </select>;
+    branch_dropdown = (
+      <select onChange={onBranchChange} value={current_branch}>
+        {options}
+      </select>
+    );
   }
-  return <div className="selectWrap">
-           {branch_dropdown}
-         </div>;
+  return (
+    <div className="selectWrap">
+      {branch_dropdown}
+    </div>
+  );
 };
 
 BranchDropdown.propTypes = {
-    defaultBranch: PropTypes.string.isRequired,
-    currentBranch: PropTypes.string,
-    branchNames: PropTypes.array,
-    onBranchChange: PropTypes.func.isRequired,
+  defaultBranch: PropTypes.string.isRequired,
+  currentBranch: PropTypes.string,
+  branchNames: PropTypes.array,
+  onBranchChange: PropTypes.func.isRequired
 };
 
 export default CommitsTab;

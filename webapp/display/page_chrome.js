@@ -1,19 +1,18 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 
-import APINotLoaded from 'es6!display/not_loaded';
-import SectionHeader from 'es6!display/section_header';
-import SimpleTooltip from 'es6!display/simple_tooltip';
-import { Grid } from 'es6!display/grid';
-import { TimeText } from 'es6!display/time';
+import APINotLoaded from 'display/not_loaded';
+import SectionHeader from 'display/section_header';
+import SimpleTooltip from 'display/simple_tooltip';
+import {Grid} from 'display/grid';
+import {TimeText} from 'display/time';
 
-import custom_content_hook from 'es6!utils/custom_content';
-import { email_head } from 'es6!utils/utils';
+import custom_content_hook from 'utils/custom_content';
+import {email_head} from 'utils/utils';
 
 import classNames from 'classnames';
 
-export var ChangesPage = React.createClass({
-
+export const ChangesPage = React.createClass({
   propTypes: {
     // should we automatically add padding to the page content?
     bodyPadding: PropTypes.bool,
@@ -28,7 +27,7 @@ export var ChangesPage = React.createClass({
     // if present, we render a link to return to the old ui
     // some pages can disable the perf widget (since they continuously
     // live-update)
-    widget: PropTypes.bool,
+    widget: PropTypes.bool
   },
 
   getDefaultProps: function() {
@@ -44,39 +43,44 @@ export var ChangesPage = React.createClass({
     var messageMarkup = null;
     if (window.changesMessageData && window.changesMessageData.message) {
       var messageData = window.changesMessageData;
-      messageMarkup = <div className='persistentMessage'>
-        {messageData.message}{"  - "}{messageData.user.email}
-      </div>;
+      messageMarkup = (
+        <div className="persistentMessage">
+          {messageData.message}
+          {'  - '}
+          {messageData.user.email}
+        </div>
+      );
     }
 
     if (this.props.isPageLoaded) {
       // NOTE: once browsers support it, we could start using
       // window.performance.mark
-      window.changesPageLoaded = window.changesPageLoaded ||
-        new Date().getTime(); // We want to compare to this window.performance,
-                              // so want to use new Date() rather than moment.
+      window.changesPageLoaded = window.changesPageLoaded || new Date().getTime(); // We want to compare to this window.performance,
+      // so want to use new Date() rather than moment.
     }
 
     var style = this.props.bodyPadding ? {padding: 20} : {};
 
-    return <div>
-      {messageMarkup}
-      <ChangesPageHeader
-        highlight={this.props.highlight}
-        fixed={this.props.fixed}
-        widget={this.props.widget}
-      />
-      <div id="ChangesPageChildren" className="nonFixedClass" style={style}>
-        {this.props.children}
+    return (
+      <div>
+        {messageMarkup}
+        <ChangesPageHeader
+          highlight={this.props.highlight}
+          fixed={this.props.fixed}
+          widget={this.props.widget}
+        />
+        <div id="ChangesPageChildren" className="nonFixedClass" style={style}>
+          {this.props.children}
+        </div>
       </div>
-    </div>;
+    );
   },
 
   componentDidMount: function() {
     var node = ReactDOM.findDOMNode(this);
 
     var messageNode = node.getElementsByClassName('persistentMessage')[0];
-    if (messageNode){
+    if (messageNode) {
       var newMargin = messageNode.offsetHeight;
 
       // always fix nav bar if there's an admin message
@@ -86,12 +90,16 @@ export var ChangesPage = React.createClass({
       }
 
       // realign objects without fixed position
-      var elementsWithTopMargins = document.getElementsByClassName('changeMarginAdminMsg');
-      if (elementsWithTopMargins){
-        for (var h  = 0; h < elementsWithTopMargins.length; h++){
-          var oldMargin = parseInt(window.getComputedStyle(elementsWithTopMargins[h])['margin-top']);
+      var elementsWithTopMargins = document.getElementsByClassName(
+        'changeMarginAdminMsg'
+      );
+      if (elementsWithTopMargins) {
+        for (var h = 0; h < elementsWithTopMargins.length; h++) {
+          var oldMargin = parseInt(
+            window.getComputedStyle(elementsWithTopMargins[h])['margin-top']
+          );
           if (oldMargin > 0) {
-            elementsWithTopMargins[h].style['margin-top'] = (oldMargin + newMargin) + "px";
+            elementsWithTopMargins[h].style['margin-top'] = oldMargin + newMargin + 'px';
           }
         }
       }
@@ -99,27 +107,26 @@ export var ChangesPage = React.createClass({
       // whatever the height of the message header is in px,
       // adjust every fixed-position object down by that amount
       var fixedElements = document.getElementsByClassName('fixedClass');
-      if (fixedElements){
-        for (var i = 0; i < fixedElements.length; i++){
+      if (fixedElements) {
+        for (var i = 0; i < fixedElements.length; i++) {
           var oldTop = parseInt(window.getComputedStyle(fixedElements[i])['top']);
-          fixedElements[i].style['top'] = (newMargin + oldTop) + "px";
+          fixedElements[i].style['top'] = newMargin + oldTop + 'px';
         }
       }
 
       // every other high-level container which is non-fixed
       // needs to be realigned
       var affectedElements = document.getElementsByClassName('nonFixedClass');
-      if (affectedElements){
-        for (var j = 0; j < affectedElements.length; j++){
-          affectedElements[j].style['margin-top'] = newMargin + "px";
+      if (affectedElements) {
+        for (var j = 0; j < affectedElements.length; j++) {
+          affectedElements[j].style['margin-top'] = newMargin + 'px';
         }
       }
     }
   }
 });
 
-export var APINotLoadedPage = React.createClass({
-
+export const APINotLoadedPage = React.createClass({
   propTypes: {
     // required, but this could be null
     calls: PropTypes.oneOfType([PropTypes.object, PropTypes.array])
@@ -129,18 +136,21 @@ export var APINotLoadedPage = React.createClass({
   },
 
   render: function() {
-    var { calls, ...props} = this.props;
+    var {calls, ...props} = this.props;
     props['isPageLoaded'] = false;
 
-    var content = this.props.fixed ?
-      <div style={{marginTop: 30}}><APINotLoaded calls={calls} /></div> :
-      <APINotLoaded calls={calls} />
+    var content = this.props.fixed
+      ? <div style={{marginTop: 30}}>
+          <APINotLoaded calls={calls} />
+        </div>
+      : <APINotLoaded calls={calls} />;
 
-    return <ChangesPage {...props}>
-      {content}
-    </ChangesPage>;
+    return (
+      <ChangesPage {...props}>
+        {content}
+      </ChangesPage>
+    );
   }
-
 });
 
 /*
@@ -149,7 +159,6 @@ export var APINotLoadedPage = React.createClass({
  * means of navigation on the page, I'd have used it.)
  */
 var ChangesPageHeader = React.createClass({
-
   propTypes: {
     highlight: PropTypes.string, // see ChangesPage
     fixed: PropTypes.bool,
@@ -166,11 +175,11 @@ var ChangesPageHeader = React.createClass({
     var feedback_href = custom_content_hook('feedbackHref');
     var feedback_link = null;
     if (feedback_href) {
-      feedback_link = <a className="headerLinkBlock floatR"
-        target="_blank"
-        href={feedback_href}>
-        Give Feedback!
-      </a>;
+      feedback_link = (
+        <a className="headerLinkBlock floatR" target="_blank" href={feedback_href}>
+          Give Feedback!
+        </a>
+      );
     }
 
     var learnMore = this.renderLearnMore();
@@ -178,19 +187,18 @@ var ChangesPageHeader = React.createClass({
     var foreign_api_header = null;
 
     if (window.changesGlobals['USE_ANOTHER_HOST']) {
-      foreign_api_header =
+      foreign_api_header = (
         <div className="headerLinkBlock floatR green">
           <SimpleTooltip
-           placement="bottom"
-           label="It looks like your local configuration makes use of a non-local host for API calls.">
-            <span style={{borderBottom: "1px dotted #777"}}>
-              Foreign API
-            </span>
+            placement="bottom"
+            label="It looks like your local configuration makes use of a non-local host for API calls.">
+            <span style={{borderBottom: '1px dotted #777'}}>Foreign API</span>
           </SimpleTooltip>
-        </div>;
+        </div>
+      );
     }
 
-/* TODO:
+    /* TODO:
         <a className="headerLinkBlock" href="/nodes/">
           Changes Internals
         </a>
@@ -198,29 +206,36 @@ var ChangesPageHeader = React.createClass({
 
     var highlight = this.props.highlight;
     var my_changes_classes = classNames({
-      headerLinkBlock: true, headerHighlight: highlight === "My Changes"
+      headerLinkBlock: true,
+      headerHighlight: highlight === 'My Changes'
     });
 
     var all_projects_classes = classNames({
-      headerLinkBlock: true, headerHighlight: highlight === "Projects"
+      headerLinkBlock: true,
+      headerHighlight: highlight === 'Projects'
     });
 
-    var classes = classNames({pageHeader: true, fixedClass: this.props.fixed });
-    return <div>
-      <div className={classes}>
-        <a className={my_changes_classes} href="/">
-          My Changes
-        </a>
-        <a className={all_projects_classes} href="/projects/">
-          Projects
-        </a>
-        <ChangesLogin />
-        {this.props.widget ? <ChangesInlinePerf /> : null}
-        {learnMore}
-        {feedback_link}
-        {foreign_api_header}
+    var classes = classNames({
+      pageHeader: true,
+      fixedClass: this.props.fixed
+    });
+    return (
+      <div>
+        <div className={classes}>
+          <a className={my_changes_classes} href="/">
+            My Changes
+          </a>
+          <a className={all_projects_classes} href="/projects/">
+            Projects
+          </a>
+          <ChangesLogin />
+          {this.props.widget ? <ChangesInlinePerf /> : null}
+          {learnMore}
+          {feedback_link}
+          {foreign_api_header}
+        </div>
       </div>
-    </div>;
+    );
   },
 
   renderLearnMore() {
@@ -229,39 +244,46 @@ var ChangesPageHeader = React.createClass({
       return null;
     }
 
-    var onClick = (e) => {
+    var onClick = e => {
       this.setState({
         helpExpanded: !this.state.helpExpanded
       });
-    }
+    };
 
     var expandedContent = null;
     if (this.state.helpExpanded) {
       var linkMarkup = _.map(learnMoreLinks, (link, index) => {
         var className = index > 0 ? 'marginTopL' : '';
-        return <div className={className}>
-          <a className="learnMoreLink" href={link.href} target="_blank">
-            <span className="learnMoreLinkTitle">{link.name}</span>
-            <div className="learnMoreDesc">
-              {link.desc}
-            </div>
-          </a> 
-        </div>;
+        return (
+          <div className={className}>
+            <a className="learnMoreLink" href={link.href} target="_blank">
+              <span className="learnMoreLinkTitle">
+                {link.name}
+              </span>
+              <div className="learnMoreDesc">
+                {link.desc}
+              </div>
+            </a>
+          </div>
+        );
       });
 
-      var expandedContent = <div className="learnMoreContent">
-        {linkMarkup}
-      </div>;
+      var expandedContent = (
+        <div className="learnMoreContent">
+          {linkMarkup}
+        </div>
+      );
     }
 
-    return <a className="learnMoreHeaderBlock headerLinkBlock floatR"
-      target="_blank">
-      <div onClick={onClick} className="learnMoreCaret">
-        Learn More
-        <i className="fa fa-caret-down" style={{marginLeft: 4}} />
-      </div>
-      {expandedContent}
-    </a>;
+    return (
+      <a className="learnMoreHeaderBlock headerLinkBlock floatR" target="_blank">
+        <div onClick={onClick} className="learnMoreCaret">
+          Learn More
+          <i className="fa fa-caret-down" style={{marginLeft: 4}} />
+        </div>
+        {expandedContent}
+      </a>
+    );
   }
 });
 
@@ -277,7 +299,6 @@ var ChangesPageHeader = React.createClass({
  *   expanded.
  */
 var ChangesInlinePerf = React.createClass({
-
   componentWillMount: function() {
     this.refreshTimer = null;
   },
@@ -296,16 +317,19 @@ var ChangesInlinePerf = React.createClass({
     // if the browser doesn't support PerformanceTiming, bail and
     // render nothing (not even the other useful info)
     // This will probably never happen, though...
-    if (!window.performance || !window.performance.timing ||
-        !window.performance.timing.navigationStart) {
+    if (
+      !window.performance ||
+      !window.performance.timing ||
+      !window.performance.timing.navigationStart
+    ) {
       return <div />;
     }
 
     // render page load time once we have that info
     var perf_markup = '---';
     if (window.changesPageLoaded) {
-      var load_time = window.changesPageLoaded -
-          window.performance.timing.navigationStart;
+      var load_time =
+        window.changesPageLoaded - window.performance.timing.navigationStart;
       perf_markup = `${load_time}ms`;
     }
 
@@ -313,21 +337,23 @@ var ChangesInlinePerf = React.createClass({
     // TODO: add some links for perf dashboards
     var expanded_info = null;
     if (this.state.expanded) {
-      expanded_info = <div className="inlinePerfDropdown">
-        <SectionHeader>API Call performance</SectionHeader>
-        {this.renderResourceTiming()}
-        {this.renderErrorsDashboardLink()}
-        {this.renderReleaseInfo()}
-      </div>;
+      expanded_info = (
+        <div className="inlinePerfDropdown">
+          <SectionHeader>API Call performance</SectionHeader>
+          {this.renderResourceTiming()}
+          {this.renderErrorsDashboardLink()}
+          {this.renderReleaseInfo()}
+        </div>
+      );
     }
 
     this.updateTimers(this.state.expanded);
 
-    var onclick = (e) => {
+    var onclick = e => {
       this.setState({
         expanded: !this.state.expanded
       });
-    }
+    };
 
     var classes = classNames({
       headerBlock: true,
@@ -336,17 +362,15 @@ var ChangesInlinePerf = React.createClass({
       inlinePerfExpanded: this.state.expanded
     });
 
-    return <div
-      className={classes}
-      style={{position: 'relative'}}>
-      <div 
-        onClick={onclick}
-        className="inlinePerfCaret">
-        {perf_markup}
-        <i className="fa fa-caret-down" style={{marginLeft: 4}} />
+    return (
+      <div className={classes} style={{position: 'relative'}}>
+        <div onClick={onclick} className="inlinePerfCaret">
+          {perf_markup}
+          <i className="fa fa-caret-down" style={{marginLeft: 4}} />
+        </div>
+        {expanded_info}
       </div>
-      {expanded_info}
-    </div>;
+    );
   },
 
   // When this widget is expanded, re-render it twice a second with the
@@ -371,12 +395,14 @@ var ChangesInlinePerf = React.createClass({
     if (!errors_href || !errors_name) {
       return <div />;
     }
-    return <div className="marginTopM">
-      <b>Link to Error Dashboard:{" "}</b>
-      <a href={errors_href}>
-        {errors_name}
-      </a>
-    </div>;
+    return (
+      <div className="marginTopM">
+        <b>Link to Error Dashboard: </b>
+        <a href={errors_href}>
+          {errors_name}
+        </a>
+      </div>
+    );
   },
 
   // Renders a table with perf data of all the ajax api calls we make
@@ -384,13 +410,15 @@ var ChangesInlinePerf = React.createClass({
     // only a few browsers support resource timing right now. We could roll our
     // own version, but its most likely not worth the effort.
     if (!window.performance.getEntries) {
-      return <div>
-        This browser doesn{"'"}t support individual performance metrics
-        for resource requests.
-      </div>;
+      return (
+        <div>
+          This browser doesn{"'"}t support individual performance metrics for resource
+          requests.
+        </div>
+      );
     }
 
-    var fmt_time = t => Math.round(t) + "ms";
+    var fmt_time = t => Math.round(t) + 'ms';
 
     var api_entries = _.chain(window.performance.getEntries())
       .filter(e => e.name.indexOf('api/0/') !== -1)
@@ -410,15 +438,26 @@ var ChangesInlinePerf = React.createClass({
         [api_name, query_params] = api_name.split('?', 2);
       }
 
-      var name_markup = api_has_query_params ?
-        <div>{api_name}<div className="subText">{query_params}</div></div> :
-        <div>{api_name}</div>;
+      var name_markup = api_has_query_params
+        ? <div>
+            {api_name}
+            <div className="subText">
+              {query_params}
+            </div>
+          </div>
+        : <div>
+            {api_name}
+          </div>;
 
       // url to trace api call
-      var trace_href = api_has_query_params ?
-        e.name + '&__trace__=1' :
-        e.name + '?__trace__=1';
-      var trace_link = <a href={trace_href} target="_blank">(trace)</a>;
+      var trace_href = api_has_query_params
+        ? e.name + '&__trace__=1'
+        : e.name + '?__trace__=1';
+      var trace_link = (
+        <a href={trace_href} target="_blank">
+          (trace)
+        </a>
+      );
 
       // make data
       data.push([name_markup, fmt_time(e.startTime), fmt_time(e.duration), trace_link]);
@@ -429,14 +468,18 @@ var ChangesInlinePerf = React.createClass({
       if (e.name.indexOf('built.js') > 0) {
         data.push([
           <em>Compiled JS</em>,
-          <em>{fmt_time(e.startTime)}</em>,
-          <em>{fmt_time(e.duration)}</em>,
+          <em>
+            {fmt_time(e.startTime)}
+          </em>,
+          <em>
+            {fmt_time(e.duration)}
+          </em>,
           ''
         ]);
       }
     });
 
-    var headers = ["API Name", "Sent At", "Duration", "Links"];
+    var headers = ['API Name', 'Sent At', 'Duration', 'Links'];
     return <Grid colnum={4} headers={headers} data={data} />;
   },
 
@@ -448,24 +491,20 @@ var ChangesInlinePerf = React.createClass({
 
     var release_info = window.changesGlobals['RELEASE_INFO'];
 
-    var release_href = "https://github.com/dropbox/changes/commit/" +
-        release_info.hash;
-    return <div className="marginTopM">
-      <b>
-        Latest Revision:
-        {" "}
-      </b>
-      {release_info.subject}
-      <div className="subText">
-        <a href={release_href} target="_blank">
-        {release_info.hash.substr(0, 7)}
-        </a>
-        {" "}committed{" "}
-        <TimeText format="X" time={release_info['commit_time']} />
-        {" "}by{" "}
-        {email_head(release_info['author_email'])}.
+    var release_href = 'https://github.com/dropbox/changes/commit/' + release_info.hash;
+    return (
+      <div className="marginTopM">
+        <b>Latest Revision: </b>
+        {release_info.subject}
+        <div className="subText">
+          <a href={release_href} target="_blank">
+            {release_info.hash.substr(0, 7)}
+          </a>{' '}
+          committed <TimeText format="X" time={release_info['commit_time']} /> by{' '}
+          {email_head(release_info['author_email'])}.
+        </div>
       </div>
-    </div>;
+    );
   },
 
   componentWillUnmount: function() {
@@ -477,7 +516,6 @@ var ChangesInlinePerf = React.createClass({
 });
 
 var ChangesLogin = React.createClass({
-
   // no properties
 
   render: function() {
@@ -485,25 +523,25 @@ var ChangesLogin = React.createClass({
       var current_location = encodeURIComponent(window.location.href);
       var login_href = '/auth/login/?orig_url=' + current_location;
 
-      return <a className="headerLinkBlock floatR" href={login_href}>
-        Log in
-      </a>;
-    } else {
-      var admin_link = <a
-          className="headerLinkBlock"
-          href="/admin"
-          title="Admin">
-          <i className="fa fa-cog"></i>
-        </a>;
-      return <div className="floatR">
-        {admin_link}
-        <a
-          className="headerLinkBlock"
-          href="/auth/logout?return=1"
-          title="Sign Out">
-          <i className="fa fa-sign-out"></i>
+      return (
+        <a className="headerLinkBlock floatR" href={login_href}>
+          Log in
         </a>
-      </div>;
+      );
+    } else {
+      var admin_link = (
+        <a className="headerLinkBlock" href="/admin" title="Admin">
+          <i className="fa fa-cog" />
+        </a>
+      );
+      return (
+        <div className="floatR">
+          {admin_link}
+          <a className="headerLinkBlock" href="/auth/logout?return=1" title="Sign Out">
+            <i className="fa fa-sign-out" />
+          </a>
+        </div>
+      );
     }
   }
 });

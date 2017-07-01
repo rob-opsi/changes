@@ -1,9 +1,9 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import { AjaxError, ProgrammingError } from 'es6!display/errors';
-import { RandomLoadingMessage, InlineLoading } from 'es6!display/loading';
+import {AjaxError, ProgrammingError} from 'display/errors';
+import {RandomLoadingMessage, InlineLoading} from 'display/loading';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
 /*
  * Convenience wrapper that takes the contents of the state variable used for
@@ -18,7 +18,6 @@ import * as api from 'es6!server/api';
  *
  */
 var APINotLoaded = React.createClass({
-
   propTypes: {
     // you can pass multiple API calls as a list (making sure they've all loaded
     // before proceeding.)
@@ -26,19 +25,19 @@ var APINotLoaded = React.createClass({
 
     // if true, show InlineLoading instead of RandomLoading
     // TODO: should always be true?
-    isInline: PropTypes.bool,
+    isInline: PropTypes.bool
   },
 
   getDefaultProps: function() {
     return {
       isInline: true
-    }
+    };
   },
 
   // note: we'll treat missing APIResponse objects (before api.fetch is called)
   // as "loading"
   render: function() {
-    var { calls, isInline, ...props} = this.props;
+    var {calls, isInline, ...props} = this.props;
     var manyCalls = _.isArray(calls);
 
     var responseForError = null; // ignored unless condition is error
@@ -64,11 +63,13 @@ var APINotLoaded = React.createClass({
     } else if (condition === 'error') {
       return <AjaxError {...props} response={responseForError} />;
     } else {
-      return <ProgrammingError>
-        APINotLoaded: Unknown condition {condition}
-      </ProgrammingError>;
+      return (
+        <ProgrammingError>
+          APINotLoaded: Unknown condition {condition}
+        </ProgrammingError>
+      );
     }
-  },
+  }
 });
 
 export default APINotLoaded;

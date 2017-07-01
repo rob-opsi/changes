@@ -1,35 +1,34 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import Request from 'es6!display/request';
-import SectionHeader from 'es6!display/section_header';
-import { Button } from 'es6!display/button';
-import ChangesLinks from 'es6!display/changes/links';
-import { ChangesPage, APINotLoadedPage } from 'es6!display/page_chrome';
-import { Grid, GridRow } from 'es6!display/grid';
-import { InfoList, InfoItem } from 'es6!display/info_list';
-import { SingleBuildStatus } from 'es6!display/changes/builds';
-import { get_runnable_condition, is_waiting } from 'es6!display/changes/build_conditions';
-import { TimeText, display_duration } from 'es6!display/time';
+import Request from 'display/request';
+import SectionHeader from 'display/section_header';
+import {Button} from 'display/button';
+import ChangesLinks from 'display/changes/links';
+import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
+import {Grid, GridRow} from 'display/grid';
+import {InfoList, InfoItem} from 'display/info_list';
+import {SingleBuildStatus} from 'display/changes/builds';
+import {get_runnable_condition, is_waiting} from 'display/changes/build_conditions';
+import {TimeText, display_duration} from 'display/time';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
-import * as utils from 'es6!utils/utils';
-import custom_content_hook from 'es6!utils/custom_content';
+import * as utils from 'utils/utils';
+import custom_content_hook from 'utils/custom_content';
 
 /**
  * Page that shows the builds associated with a single node, across all projects.
  */
 var NodePage = React.createClass({
-
   propTypes: {
-    nodeID: PropTypes.string.isRequired,
+    nodeID: PropTypes.string.isRequired
   },
 
   getInitialState: function() {
     return {
       nodeJobs: null,
-      nodeDetails: null,
-    }
+      nodeDetails: null
+    };
   },
 
   componentDidMount: function() {
@@ -40,15 +39,13 @@ var NodePage = React.createClass({
     api.fetch(this, {
       nodeDetails: detailsEndpoint,
       nodeStatus: `/api/0/nodes/${nodeID}/status/`,
-      nodeJobs: jobsEndpoint,
-    })
+      nodeJobs: jobsEndpoint
+    });
   },
 
   render: function() {
     if (!api.allLoaded([this.state.nodeJobs, this.state.nodeDetails])) {
-      return <APINotLoadedPage
-        calls={[this.state.nodeJobs, this.state.nodeDetails]}
-      />;
+      return <APINotLoadedPage calls={[this.state.nodeJobs, this.state.nodeDetails]} />;
     }
 
     var nodeID = this.props.nodeID;
@@ -61,13 +58,14 @@ var NodePage = React.createClass({
       const nodeStatus = this.state.nodeStatus.getReturnedData();
       console.log(nodeStatus);
       if (nodeStatus.offline === undefined) {
-         nodeStatusText = <span className="bluishGray">Unknown</span>;
+        nodeStatusText = <span className="bluishGray">Unknown</span>;
       } else {
-         nodeStatusText = nodeStatus.offline ?
-           <span className="red">Offline</span> :
-           <span className="green">Online</span>;
+        nodeStatusText = nodeStatus.offline
+          ? <span className="red">Offline</span>
+          : <span className="green">Online</span>;
 
-          toggleNodeButton = <div className="floatR">
+        toggleNodeButton = (
+          <div className="floatR">
             <Request
               parentElem={this}
               name="toggleNode"
@@ -75,30 +73,34 @@ var NodePage = React.createClass({
               endpoint={`/api/0/nodes/${nodeID}/status/?toggle=1`}>
               <Button type="white">
                 <span>
-                  {nodeStatus.offline ? "Bring Node Online" : "Take Node Offline"}
+                  {nodeStatus.offline ? 'Bring Node Online' : 'Take Node Offline'}
                 </span>
               </Button>
             </Request>
-          </div>;
+          </div>
+        );
       }
-    };
+    }
 
     var cellClasses = ['buildWidgetCell', 'nowrap', 'nowrap', 'nowrap', 'wide', 'nowrap'];
-    var headers = [ 'Build', 'Duration', 'Target', 'Project', 'Name', 'Created'];
+    var headers = ['Build', 'Duration', 'Target', 'Project', 'Name', 'Created'];
 
     var grid_data = _.map(this.state.nodeJobs.getReturnedData(), d => {
-      var project_href = "/project/" + d.project.slug;
-      let duration = !is_waiting(get_runnable_condition(d)) ?
-        display_duration(d.duration / 1000) :
-        null;
+      var project_href = '/project/' + d.project.slug;
+      let duration = !is_waiting(get_runnable_condition(d))
+        ? display_duration(d.duration / 1000)
+        : null;
       return new GridRow(d.id, [
         <SingleBuildStatus build={d.build} parentElem={this} />,
         duration,
         ChangesLinks.phab(d.build),
-        <a href={project_href}>{d.project.name}</a>,
+        <a href={project_href}>
+          {d.project.name}
+        </a>,
         d.build.name,
-        <TimeText time={d.dateCreated} />]);
-    })
+        <TimeText time={d.dateCreated} />
+      ]);
+    });
 
     var details = this.state.nodeDetails.getReturnedData();
 
@@ -107,38 +109,46 @@ var NodePage = React.createClass({
 
     var extra_info_markup = null;
     if (extra_info_name && extra_info_href) {
-      var extra_info_markup = <a
-        className="external inlineBlock"
-        style={{marginTop: 3}}
-        target="_blank"
-        href={extra_info_href}>
-        {extra_info_name}
-      </a>;
+      var extra_info_markup = (
+        <a
+          className="external inlineBlock"
+          style={{marginTop: 3}}
+          target="_blank"
+          href={extra_info_href}>
+          {extra_info_name}
+        </a>
+      );
     }
 
-    return <ChangesPage>
-      {toggleNodeButton}
-      <SectionHeader>{details.name}</SectionHeader>
-      <InfoList>
-        <InfoItem label="Node ID">{details.id}</InfoItem>
-        <InfoItem label="First Seen">
-          <TimeText time={details.dateCreated} />
-        </InfoItem>
-        <InfoItem label="Status">
-          {nodeStatusText}
-        </InfoItem>
-      </InfoList>
-      {extra_info_markup}
-      <div className="marginBottomM marginTopM paddingTopS">
-        Recent runs on this node
-      </div>
-      <Grid
-        colnum={headers.length}
-        data={grid_data}
-        cellClasses={cellClasses}
-        headers={headers}
-      />
-    </ChangesPage>;
+    return (
+      <ChangesPage>
+        {toggleNodeButton}
+        <SectionHeader>
+          {details.name}
+        </SectionHeader>
+        <InfoList>
+          <InfoItem label="Node ID">
+            {details.id}
+          </InfoItem>
+          <InfoItem label="First Seen">
+            <TimeText time={details.dateCreated} />
+          </InfoItem>
+          <InfoItem label="Status">
+            {nodeStatusText}
+          </InfoItem>
+        </InfoList>
+        {extra_info_markup}
+        <div className="marginBottomM marginTopM paddingTopS">
+          Recent runs on this node
+        </div>
+        <Grid
+          colnum={headers.length}
+          data={grid_data}
+          cellClasses={cellClasses}
+          headers={headers}
+        />
+      </ChangesPage>
+    );
   }
 });
 

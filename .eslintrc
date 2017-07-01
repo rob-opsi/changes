@@ -8,7 +8,8 @@
     // eslint out of the box doesn't quite work properly with react (the
     // no-unused-vars rule is broken.) We mainly need the plugin to fix
     // that, but we also add some react-specific lint rules too.
-    "react"
+    "react",
+    "prettier"
   ],
   "rules": {
     // don't warn about variable names that aren't in camelcase. Enough code
@@ -40,7 +41,6 @@
     "react/no-unknown-property": 1,
     "react/prop-types": 1,
     "react/react-in-jsx-scope": 1,
-    "react/require-extension": 1,
     "react/self-closing-comp": 1,
     "react/sort-comp": 1,
 
@@ -58,6 +58,6 @@
     // always use parenthesis for large expressions. Nope.
     "react/wrap-multilines": 0,
     // one component per file. We group similar components
-    "react/no-multi-comp": 0,
+    "react/no-multi-comp": 0
   }
 }

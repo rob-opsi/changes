@@ -1,6 +1,6 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import Examples from 'es6!display/examples';
+import Examples from 'display/examples';
 
 /*
  * Basic code to deal with the fact that our builds (and similar objects like
@@ -21,20 +21,20 @@ export const COND_UNKNOWN = 'unknown';
 export const COND_WAITING = 'waiting';
 export const COND_WAITING_WITH_ERRORS = 'waiting_with_errors';
 export const COND_WAITING_WITH_FAILURES = 'waiting_with_failures';
-  // to generate icons for projects that do not
-  // have any builds (for the projects page, for example)
+// to generate icons for projects that do not
+// have any builds (for the projects page, for example)
 export const COND_NO_BUILDS = null;
 
 const ICON_CLASSES = {
-  [ COND_PASSED ]: 'fa-check-circle green',
-  [ COND_FAILED ]: 'fa-times-circle red',
-  [ COND_FAILED_INFRA ]: 'fa-exclamation-circle black',
-  [ COND_WAITING ]: 'fa-clock-o blue', // blue instead of blue-gray
-  [ COND_WAITING_WITH_FAILURES ]: 'fa-clock-o red',
-  [ COND_WAITING_WITH_ERRORS ]: 'fa-clock-o black',
-  [ COND_FAILED_ABORTED ]: 'red fa-ban',
-  [ COND_NO_BUILDS ]: 'fa-circle-thin blue',
-}
+  [COND_PASSED]: 'fa-check-circle green',
+  [COND_FAILED]: 'fa-times-circle red',
+  [COND_FAILED_INFRA]: 'fa-exclamation-circle black',
+  [COND_WAITING]: 'fa-clock-o blue', // blue instead of blue-gray
+  [COND_WAITING_WITH_FAILURES]: 'fa-clock-o red',
+  [COND_WAITING_WITH_ERRORS]: 'fa-clock-o black',
+  [COND_FAILED_ABORTED]: 'red fa-ban',
+  [COND_NO_BUILDS]: 'fa-circle-thin blue'
+};
 
 var all_build_conditions = [
   COND_PASSED,
@@ -44,24 +44,31 @@ var all_build_conditions = [
   COND_UNKNOWN,
   COND_WAITING,
   COND_WAITING_WITH_ERRORS,
-  COND_WAITING_WITH_FAILURES,
+  COND_WAITING_WITH_FAILURES
 ];
 
-export var is_waiting = function(condition) {
-    return condition === COND_WAITING ||
-           condition === COND_WAITING_WITH_ERRORS ||
-           condition === COND_WAITING_WITH_FAILURES;
-}
+export const is_waiting = function(condition) {
+  return (
+    condition === COND_WAITING ||
+    condition === COND_WAITING_WITH_ERRORS ||
+    condition === COND_WAITING_WITH_FAILURES
+  );
+};
 
 /*
  * Looks at a build/job/jobstep/test's status and result fields to figure out what
  * condition the build is in.
  */
-export var get_runnable_condition = function(runnable) {
+export const get_runnable_condition = function(runnable) {
   const status = runnable.status ? runnable.status.id : 'finished';
   var result = runnable.result.id;
 
-  if (status === 'in_progress' || status === 'queued' || status === 'pending_allocation' || status == 'allocated') {
+  if (
+    status === 'in_progress' ||
+    status === 'queued' ||
+    status === 'pending_allocation' ||
+    status == 'allocated'
+  ) {
     if (runnable.stats && runnable.stats['test_failures']) {
       return COND_WAITING_WITH_ERRORS;
     }
@@ -72,24 +79,29 @@ export var get_runnable_condition = function(runnable) {
   }
 
   const result_condition = {
-      'passed':              COND_PASSED,
-      'quarantined_passed':  COND_PASSED,
-      'failed':              COND_FAILED,
-      'quarantined_failed':  COND_FAILED,
-      'skipped':             COND_UNKNOWN,
-      'quarantined_skipped': COND_UNKNOWN,
-      'aborted':             COND_FAILED_ABORTED,
-      'infra_failed':        COND_FAILED_INFRA,
+    passed: COND_PASSED,
+    quarantined_passed: COND_PASSED,
+    failed: COND_FAILED,
+    quarantined_failed: COND_FAILED,
+    skipped: COND_UNKNOWN,
+    quarantined_skipped: COND_UNKNOWN,
+    aborted: COND_FAILED_ABORTED,
+    infra_failed: COND_FAILED_INFRA
   };
   return result_condition[result] || COND_UNKNOWN;
-}
+};
 
 /*
  * Similar to get_runnable_condition, but take in statusId and
  * resultId directly.
  */
-export var convert_status_and_result_to_condition = function(statusId, resultId) {
-  if (statusId === 'in_progress' || statusId === 'queued' || statusId === 'pending_allocation' || statusId == 'allocated') {
+export const convert_status_and_result_to_condition = function(statusId, resultId) {
+  if (
+    statusId === 'in_progress' ||
+    statusId === 'queued' ||
+    statusId === 'pending_allocation' ||
+    statusId == 'allocated'
+  ) {
     if (resultId === 'failed') {
       return COND_WAITING_WITH_FAILURES;
     }
@@ -97,25 +109,25 @@ export var convert_status_and_result_to_condition = function(statusId, resultId)
   }
 
   const result_condition = {
-      'passed':              COND_PASSED,
-      'quarantined_passed':  COND_PASSED,
-      'failed':              COND_FAILED,
-      'quarantined_failed':  COND_FAILED,
-      'skipped':             COND_UNKNOWN,
-      'quarantined_skipped': COND_UNKNOWN,
-      'aborted':             COND_FAILED_ABORTED,
-      'infra_failed':        COND_FAILED_INFRA,
+    passed: COND_PASSED,
+    quarantined_passed: COND_PASSED,
+    failed: COND_FAILED,
+    quarantined_failed: COND_FAILED,
+    skipped: COND_UNKNOWN,
+    quarantined_skipped: COND_UNKNOWN,
+    aborted: COND_FAILED_ABORTED,
+    infra_failed: COND_FAILED_INFRA
   };
   return result_condition[resultId] || COND_UNKNOWN;
-}
+};
 
 /*
  * Combines the conditions of a bunch of runnables into a single summary
  * condition: if any failed or haven't finished, returns failed/waiting, etc.
  */
-export var get_runnables_summary_condition = function(runnables) {
-  var any_condition = condition => _.any(runnables,
-    r => get_runnable_condition(r) === condition);
+export const get_runnables_summary_condition = function(runnables) {
+  var any_condition = condition =>
+    _.any(runnables, r => get_runnable_condition(r) === condition);
 
   // I picked what I thought was a reasonable order here
   var any_aborted = any_condition(COND_FAILED_ABORTED);
@@ -126,43 +138,45 @@ export var get_runnables_summary_condition = function(runnables) {
   var any_waiting_with_failures = any_condition(COND_WAITING_WITH_FAILURES);
   var any_unknown = any_condition(COND_UNKNOWN);
 
-  return (any_aborted && COND_FAILED_ABORTED) ||
+  return (
+    (any_aborted && COND_FAILED_ABORTED) ||
     (any_failed_infra && COND_FAILED_INFRA) ||
     (any_failed && COND_FAILED) ||
     (any_waiting_with_errors && COND_WAITING_WITH_ERRORS) ||
     (any_waiting_with_failures && COND_WAITING_WITH_FAILURES) ||
     (any_waiting && COND_WAITING) ||
     (any_unknown && COND_UNKNOWN) ||
-    COND_PASSED;
-}
+    COND_PASSED
+  );
+};
 
 // short, readable text for runnable conditions.
 // tooltip text is for generating hover text on
 // status icons only.
-export var get_runnable_condition_short_text = function(condition, tooltip = false) {
+export const get_runnable_condition_short_text = function(condition, tooltip = false) {
   switch (condition) {
-      case COND_PASSED:
-        return tooltip ? 'Passing' : 'passed';
-      case COND_FAILED:
-        return tooltip ? 'Failing' : 'failed';
-      case COND_FAILED_ABORTED:
-        return 'aborted';
-      case COND_FAILED_INFRA:
-        return tooltip ? 'Infrastructure failure' : 'infrastructure failure';
-      case COND_WAITING_WITH_ERRORS:
-        return 'in progress (errors occurred)';
-      case COND_WAITING_WITH_FAILURES:
-        return 'in progress (test failures occurred)';
-      case COND_WAITING:
-        return 'in progress';
-      case COND_NO_BUILDS:
-        return tooltip ? 'Not yet run' : '';
-      default:
-        return 'unknown';
+    case COND_PASSED:
+      return tooltip ? 'Passing' : 'passed';
+    case COND_FAILED:
+      return tooltip ? 'Failing' : 'failed';
+    case COND_FAILED_ABORTED:
+      return 'aborted';
+    case COND_FAILED_INFRA:
+      return tooltip ? 'Infrastructure failure' : 'infrastructure failure';
+    case COND_WAITING_WITH_ERRORS:
+      return 'in progress (errors occurred)';
+    case COND_WAITING_WITH_FAILURES:
+      return 'in progress (test failures occurred)';
+    case COND_WAITING:
+      return 'in progress';
+    case COND_NO_BUILDS:
+      return tooltip ? 'Not yet run' : '';
+    default:
+      return 'unknown';
   }
-}
+};
 
-export var get_runnable_condition_color_cls = function(condition, background = false) {
+export const get_runnable_condition_color_cls = function(condition, background = false) {
   switch (condition) {
     case COND_PASSED:
       return background ? 'greenBg' : 'green';
@@ -178,27 +192,30 @@ export var get_runnable_condition_color_cls = function(condition, background = f
     case COND_UNKNOWN:
       return background ? 'mediumGrayBg' : 'mediumGray';
   }
-}
+};
 
 var get_runnable_condition_icon_classname = function(condition) {
   return 'fa conditionDotIcon ' + ICON_CLASSES[condition];
-}
+};
 
-export var get_runnable_condition_icon = function(condition) {
+export const get_runnable_condition_icon = function(condition) {
   var label = get_runnable_condition_short_text(condition, true);
 
-  return <i className={get_runnable_condition_icon_classname(condition)}
-            title={label}
-            alt={label} />;
-}
+  return (
+    <i
+      className={get_runnable_condition_icon_classname(condition)}
+      title={label}
+      alt={label}
+    />
+  );
+};
 
 /*
  * Renders a rounded square with a color that indicates the condition of the
  * runnable (passed/failed/unknown/not yet run.) Shows icons instead of
  * dots for builds that haven't finished yet or were cancelled
  */
-export var ConditionDot = React.createClass({
-
+export const ConditionDot = React.createClass({
   propTypes: {
     // the runnable condition to render (see get_runnable_condition)
     condition: PropTypes.oneOf(all_build_conditions).isRequired,
@@ -207,7 +224,7 @@ export var ConditionDot = React.createClass({
     // (only if dot >= small)
     num: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     // smaller = 12px, small = 16px
-    size: PropTypes.oneOf(["smaller", "small", "medium", "large"]),
+    size: PropTypes.oneOf(['smaller', 'small', 'medium', 'large']),
     // we have a special UI indicator to represent multiple builds
     multiIndicator: PropTypes.bool
   },
@@ -217,7 +234,7 @@ export var ConditionDot = React.createClass({
       num: null,
       size: 'small',
       multiIndicator: false
-    }
+    };
   },
 
   render: function() {
@@ -234,7 +251,7 @@ export var ConditionDot = React.createClass({
       };
 
       var style = {
-        fontSize: font_sizes[this.props.size],
+        fontSize: font_sizes[this.props.size]
       };
       if (this.props.size === 'medium') {
         style = _.extend(style, {marginLeft: 2, marginRight: 6});
@@ -242,10 +259,7 @@ export var ConditionDot = React.createClass({
 
       var className = get_runnable_condition_icon_classname(condition);
 
-      dot = <i
-        className={className}
-        style={style}
-      />;
+      dot = <i className={className} style={style} />;
     } else {
       var classes = [
         'conditionDot',
@@ -256,26 +270,36 @@ export var ConditionDot = React.createClass({
 
       // cap num at 99 unless rendering the large widget
       var num = this.props.num;
-      if (this.props.size !== 'large' &&
-          (_.isFinite(num) && num > 99)) {
+      if (this.props.size !== 'large' && (_.isFinite(num) && num > 99)) {
         num = '99+';
       }
 
-      if ((_.isString(num) && num.length === 1) ||
-          (_.isFinite(num) && num > 0 && num < 9)) {
+      if (
+        (_.isString(num) && num.length === 1) ||
+        (_.isFinite(num) && num > 0 && num < 9)
+      ) {
         classes.push('singleDigit');
       }
 
-      var text = num && this.props.size !== "smaller" ?
-        <span className="dotText">{num}</span> :
-        null;
+      var text =
+        num && this.props.size !== 'smaller'
+          ? <span className="dotText">
+              {num}
+            </span>
+          : null;
 
-      dot = <span className={classes.join(" ")}>{text}</span>;
+      dot = (
+        <span className={classes.join(' ')}>
+          {text}
+        </span>
+      );
     }
 
-    return <span>
-      {dot}
-    </span>;
+    return (
+      <span>
+        {dot}
+      </span>
+    );
   }
 });
 
@@ -291,7 +315,12 @@ Examples.add('ConditionDot', __ => {
     <ConditionDot condition="unknown" />,
     <div>
       <ConditionDot className="marginRightS" condition="passed" size="small" num={222} />
-      <ConditionDot className="marginRightS" condition="passed" size="smaller" num={222} />
+      <ConditionDot
+        className="marginRightS"
+        condition="passed"
+        size="smaller"
+        num={222}
+      />
       <ConditionDot className="marginRightS" condition="passed" size="medium" num={222} />
       <ConditionDot className="marginRightS" condition="passed" size="large" num={222} />
     </div>,

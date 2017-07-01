@@ -1,13 +1,13 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import ChangesLinks from 'es6!display/changes/links';
-import SectionHeader from 'es6!display/section_header';
-import { ChangesPage, APINotLoadedPage } from 'es6!display/page_chrome';
-import { InfoList, InfoItem } from 'es6!display/info_list';
+import ChangesLinks from 'display/changes/links';
+import SectionHeader from 'display/section_header';
+import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
+import {InfoList, InfoItem} from 'display/info_list';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
-import * as utils from 'es6!utils/utils';
+import * as utils from 'utils/utils';
 
 /**
  * Views the file contents of a change. Useful for edge cases like arc test,
@@ -17,15 +17,14 @@ import * as utils from 'es6!utils/utils';
  * without (plain commits)
  */
 var CodePage = React.createClass({
-
   propTypes: {
-    sourceID: PropTypes.string.isRequired,
+    sourceID: PropTypes.string.isRequired
   },
 
   getInitialState: function() {
     return {
-      source: null,
-    }
+      source: null
+    };
   },
 
   componentDidMount: function() {
@@ -33,7 +32,7 @@ var CodePage = React.createClass({
 
     api.fetch(this, {
       source: `/api/0/sources/${sourceID}`
-    })
+    });
   },
 
   render: function() {
@@ -47,33 +46,37 @@ var CodePage = React.createClass({
 
     var message_lines = utils.split_lines(source.revision.message);
     var title = _.first(message_lines);
-    var message_body = _.rest(message_lines).join("\n").trim();
+    var message_body = _.rest(message_lines).join('\n').trim();
 
-    return <ChangesPage>
-      <SectionHeader>{title}</SectionHeader>
-      <pre style={{marginBottom: 15, marginTop: 5}}>
-      {message_body}
-      </pre>
-      <InfoList className="marginBottomL">
-        <InfoItem label="Internal Changes ID">
-          {source.id}
-        </InfoItem>
-        <InfoItem label="Base Commit SHA">
-          <a 
-            className="external" 
-            target="_blank" 
-            href={ChangesLinks.phabCommitHref(source.revision)}>
-            {source.revision.sha}
-          </a>
-        </InfoItem>
-        <InfoItem label="Has Patch?">
-          {source.patch ? 'Yes' : 'No'}
-        </InfoItem>
-      </InfoList>
-      <pre className="defaultPre">
-      {source.diff}
-      </pre>
-    </ChangesPage>;
+    return (
+      <ChangesPage>
+        <SectionHeader>
+          {title}
+        </SectionHeader>
+        <pre style={{marginBottom: 15, marginTop: 5}}>
+          {message_body}
+        </pre>
+        <InfoList className="marginBottomL">
+          <InfoItem label="Internal Changes ID">
+            {source.id}
+          </InfoItem>
+          <InfoItem label="Base Commit SHA">
+            <a
+              className="external"
+              target="_blank"
+              href={ChangesLinks.phabCommitHref(source.revision)}>
+              {source.revision.sha}
+            </a>
+          </InfoItem>
+          <InfoItem label="Has Patch?">
+            {source.patch ? 'Yes' : 'No'}
+          </InfoItem>
+        </InfoList>
+        <pre className="defaultPre">
+          {source.diff}
+        </pre>
+      </ChangesPage>
+    );
   }
 });
 

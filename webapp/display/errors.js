@@ -1,43 +1,43 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import Examples from 'es6!display/examples';
+import Examples from 'display/examples';
 
 /*
  * Renders a red error box
  */
-export var Error = React.createClass({
-
+export const Error = React.createClass({
   propTypes: {
     // ...
     // transfers all properties to rendered <div />
   },
 
   render: function() {
-    var { className, ...props} = this.props;
-    className = (className || "") + " error";
+    var {className, ...props} = this.props;
+    className = (className || '') + ' error';
 
-    return <div {...props} className={className}>
-      {this.props.children}
-    </div>;
-  },
+    return (
+      <div {...props} className={className}>
+        {this.props.children}
+      </div>
+    );
+  }
 });
 
 /*
  * Convenience class that takes an ajax response and renders an <Error />
  * TODO: handle multiple ajax responses?
  */
-export var AjaxError = React.createClass({
-
+export const AjaxError = React.createClass({
   propTypes: {
     // the ajax response object (not the apiresponse wrapper! TODO: allow either?)
-    response: PropTypes.object.isRequired,
+    response: PropTypes.object.isRequired
 
     // ...
     // transfers other properties to <Error /> (which transfers to <div />)
   },
 
   render: function() {
-    var { response, ...props} = this.props;
+    var {response, ...props} = this.props;
     var response_status = response.status || null;
     var response_text = response.responseText.trim();
     // get rid of " at beginning and end
@@ -49,45 +49,57 @@ export var AjaxError = React.createClass({
     }
 
     var status_titles = {
-      '401': " (NOT LOGGED IN)",
-      '404': " (NOT FOUND)"
+      '401': ' (NOT LOGGED IN)',
+      '404': ' (NOT FOUND)'
     };
 
     var status_title = status_titles[response_status] || null;
-    response_text = response_text || "";
+    response_text = response_text || '';
 
     if (!response_status && !response_text) {
       response_text = <i>Empty response</i>;
     }
 
-    return <Error {...props}>
-      <b>{response_status}{status_title}</b>
-      <div>{response_text}</div>
-    </Error>;
-  },
+    return (
+      <Error {...props}>
+        <b>
+          {response_status}
+          {status_title}
+        </b>
+        <div>
+          {response_text}
+        </div>
+      </Error>
+    );
+  }
 });
 
 /*
  * Renders a purple error box when someone is misuing a component. One of my
  * favorite classes: use this in a react component as an assert failure
  */
-export var ProgrammingError = React.createClass({
-
+export const ProgrammingError = React.createClass({
   propTypes: {
     // ...
     // transfers all properties to rendered <div />
   },
 
   render: function() {
-    var { className, ...props} = this.props;
-    className = (className || "") + " programmingError";
+    var {className, ...props} = this.props;
+    className = (className || '') + ' programmingError';
 
-    return <div {...props} className={className}>
-      {this.props.children}
-    </div>;
-  },
+    return (
+      <div {...props} className={className}>
+        {this.props.children}
+      </div>
+    );
+  }
 });
 
 Examples.add('Error', __ => {
-  return [<Error>An error has occurred. Let{"'"}s be cryptic.</Error>];
+  return [
+    <Error>
+      An error has occurred. Let{"'"}s be cryptic.
+    </Error>
+  ];
 });

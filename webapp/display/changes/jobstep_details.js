@@ -1,15 +1,15 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import APINotLoaded from 'es6!display/not_loaded';
+import APINotLoaded from 'display/not_loaded';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
 /*
  * Shows artifacts for a jobstep
  */
-export var JobstepDetails = React.createClass({
+export const JobstepDetails = React.createClass({
   propTypes: {
-    jobstepID: PropTypes.string,
+    jobstepID: PropTypes.string
   },
 
   getInitialState: function() {
@@ -23,18 +23,20 @@ export var JobstepDetails = React.createClass({
   },
 
   render: function() {
-    var { jobstepID, className, ...props} = this.props;  // eslint-disable-line
+    var {jobstepID, className, ...props} = this.props; // eslint-disable-line
 
     if (!api.isLoaded(this.state.details)) {
       return <APINotLoaded calls={this.state.details} />;
     }
     var details = this.state.details.getReturnedData();
 
-    className = (className || "") + " jobstepDetails";
+    className = (className || '') + ' jobstepDetails';
 
-    return <div {...props} className={className}>
-      {this.renderArtifacts(details.artifacts)}
-    </div>;
+    return (
+      <div {...props} className={className}>
+        {this.renderArtifacts(details.artifacts)}
+      </div>
+    );
   },
 
   renderArtifacts(artifacts) {
@@ -44,13 +46,19 @@ export var JobstepDetails = React.createClass({
       _.each(artifacts, a => {
         if (a.url) {
           markup.push(
-              <div><a className="external" target="_blank" href={a.url}>
+            <div>
+              <a className="external" target="_blank" href={a.url}>
                 {a.name}
-              </a></div>
+              </a>
+            </div>
           );
         } else {
           // if there's no URL don't add a link
-          markup.push(<div>{a.name}</div>);
+          markup.push(
+            <div>
+              {a.name}
+            </div>
+          );
         }
       });
     }

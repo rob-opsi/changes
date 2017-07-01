@@ -1,8 +1,8 @@
 import React from 'react';
 import moment from 'moment';
+import URI from 'urijs';
 
-import SimpleTooltip from 'es6!display/simple_tooltip';
-
+import SimpleTooltip from 'display/simple_tooltip';
 
 // return the age of a build in seconds
 function getBuildAge(lastBuild) {
@@ -17,7 +17,6 @@ function getBuildAge(lastBuild) {
  * rendering a shorter name for a repo url.
  */
 var ChangesUI = {
-
   // grabs the last path param or filename after : for a repo name
   getShortRepoName: function(repo_url) {
     return _.last(_.compact(repo_url.split(/:|\//)));
@@ -27,17 +26,19 @@ var ChangesUI = {
 
   // projects whose last build was over a week old are considered stale
   projectIsStale: function(lastBuild) {
-    var age = getBuildAge(lastBuild)
+    var age = getBuildAge(lastBuild);
 
-    return age > 60*60*24*7;
+    return age > 60 * 60 * 24 * 7;
   },
 
   // renders a lock icon with tooltip: you may need special permissions to see
   // this (I think not everyone can see Jenkins)
   restrictedIcon() {
-    return <SimpleTooltip label="You may need special permissions to see this">
-      <i className="fa fa-lock" style={{ opacity: "0.8" }}/>
-    </SimpleTooltip>;
+    return (
+      <SimpleTooltip label="You may need special permissions to see this">
+        <i className="fa fa-lock" style={{opacity: '0.8'}} />
+      </SimpleTooltip>
+    );
   },
 
   // takes a blob of text and wraps urls in anchor tags
@@ -87,7 +88,7 @@ var ChangesUI = {
       }
 
       return wrapped_event_handler.apply(this, args);
-    }
+    };
   }
 };
 

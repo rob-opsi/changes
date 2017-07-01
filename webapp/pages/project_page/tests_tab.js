@@ -1,18 +1,18 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 import moment from 'moment';
+import URI from 'urijs';
 
-import APINotLoaded from 'es6!display/not_loaded';
-import ChangesLinks from 'es6!display/changes/links';
-import SectionHeader from 'es6!display/section_header';
-import SimpleTooltip from 'es6!display/simple_tooltip';
-import { Grid } from 'es6!display/grid';
-import { Menu1, MenuUtils } from 'es6!display/menus';
-import { TimeText } from 'es6!display/time';
+import APINotLoaded from 'display/not_loaded';
+import ChangesLinks from 'display/changes/links';
+import SectionHeader from 'display/section_header';
+import SimpleTooltip from 'display/simple_tooltip';
+import {Grid} from 'display/grid';
+import {Menu1, MenuUtils} from 'display/menus';
+import {TimeText} from 'display/time';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
 var TestsTab = React.createClass({
-
   propTypes: {
     // the project api response
     project: PropTypes.object,
@@ -21,17 +21,14 @@ var TestsTab = React.createClass({
     // quarantine tasks api response
     quarantineTasks: PropTypes.object,
     // the ProjectPage element
-    pageElem: PropTypes.object.isRequired,
+    pageElem: PropTypes.object.isRequired
   },
 
-  menuItems: [
-    'Flaky Tests Dashboard',
-    'Quarantine Task List',
-  ],
+  menuItems: ['Flaky Tests Dashboard', 'Quarantine Task List'],
 
   getInitialState: function() {
     return {
-      selectedItem: 'Flaky Tests Dashboard',
+      selectedItem: 'Flaky Tests Dashboard'
     };
   },
 
@@ -41,10 +38,12 @@ var TestsTab = React.createClass({
     // break with convention and use a query parameter here, since we already
     // use the hash for the overall tab
     var selectedScreen = MenuUtils.selectItemFromHash(
-      '#' + queryParams['section'], this.menuItems);
+      '#' + queryParams['section'],
+      this.menuItems
+    );
 
     if (selectedScreen) {
-      this.setState({ selectedItem: selectedScreen });
+      this.setState({selectedItem: selectedScreen});
     }
   },
 
@@ -61,20 +60,20 @@ var TestsTab = React.createClass({
 
   render: function() {
     if (!api.allLoaded([this.props.flakyTests, this.props.quarantineTasks])) {
-      return <APINotLoaded
-        calls={[this.props.flakyTests, this.props.quarantineTasks]}
-      />;
+      return <APINotLoaded calls={[this.props.flakyTests, this.props.quarantineTasks]} />;
     }
 
     // render menu
     var selectedItem = this.state.selectedItem;
 
-    var menu = <Menu1
-      className="marginBottomM"
-      items={this.menuItems}
-      selectedItem={selectedItem}
-      onClick={MenuUtils.onClickQueryParam(this, selectedItem, 'section')}
-    />;
+    var menu = (
+      <Menu1
+        className="marginBottomM"
+        items={this.menuItems}
+        selectedItem={selectedItem}
+        onClick={MenuUtils.onClickQueryParam(this, selectedItem, 'section')}
+      />
+    );
 
     var content = null;
     switch (selectedItem) {
@@ -89,57 +88,68 @@ var TestsTab = React.createClass({
         throw 'unreachable';
     }
 
-    return <div>
-      {menu}
-      {content}
-    </div>;
+    return (
+      <div>
+        {menu}
+        {content}
+      </div>
+    );
   },
 
   renderFlakyTests() {
     var flakyTestsDict = this.props.flakyTests.getReturnedData();
     var date = flakyTestsDict.date;
     var flakyTests = flakyTestsDict.flakyTests;
-  
+
     var data = _.map(flakyTests, test => {
       return [
         <div>
-          {ChangesLinks.flaky_test_history(test)}{this.getQuarantineTasksForFlakyTest(test)}
-          <div className="subText">{test.name}</div>
+          {ChangesLinks.flaky_test_history(test)}
+          {this.getQuarantineTasksForFlakyTest(test)}
+          <div className="subText">
+            {test.name}
+          </div>
         </div>,
         test.double_reruns,
         <span>
           {test.flaky_runs}
-          {" ("}
+          {' ('}
           {(100 * test.flaky_runs / test.passing_runs).toFixed(2)}
-          {"%)"}
+          {'%)'}
         </span>
       ];
     });
 
     if (!flakyTests.length) {
-      return <div>
-        <SectionHeader>Flaky Tests ({date})</SectionHeader>
-        <p>There were no flaky tests on this day.</p>
-      </div>;
+      return (
+        <div>
+          <SectionHeader>
+            Flaky Tests ({date})
+          </SectionHeader>
+          <p>There were no flaky tests on this day.</p>
+        </div>
+      );
     }
 
-    return <div>
-      <SectionHeader>Flaky Tests ({date})</SectionHeader>
-      <p>
-        A test is called flaky if its first run failed, but some of its reruns
-        passed.  The goal of this page is to show the flakiest tests of this
-        project so engineers can investigate why they are flaky and fix them.
-      </p>
-      <p>
-        We store and show up to 200 flaky tests per day.
-      </p>
-      <Grid
-        colnum={3}
-        headers={['Test', 'Double Flakes', 'Flaky Runs (% passing)']}
-        cellClasses={['wide', 'nowrap', 'nowrap']}
-        data={data}
-      />
-    </div>;
+    return (
+      <div>
+        <SectionHeader>
+          Flaky Tests ({date})
+        </SectionHeader>
+        <p>
+          A test is called flaky if its first run failed, but some of its reruns passed.
+          The goal of this page is to show the flakiest tests of this project so engineers
+          can investigate why they are flaky and fix them.
+        </p>
+        <p>We store and show up to 200 flaky tests per day.</p>
+        <Grid
+          colnum={3}
+          headers={['Test', 'Double Flakes', 'Flaky Runs (% passing)']}
+          cellClasses={['wide', 'nowrap', 'nowrap']}
+          data={data}
+        />
+      </div>
+    );
   },
 
   getQuarantineTasksForFlakyTest(test) {
@@ -162,13 +172,21 @@ var TestsTab = React.createClass({
     var markup = [];
     _.each(linkedTasks, (task, index) => {
       // TODO: use a better format than ISO8601
-      var dateModified = moment.unix(task.dateModified).local().format(
-        'ddd, MMMM Do YYYY, h:mm:ss a');
+      var dateModified = moment
+        .unix(task.dateModified)
+        .local()
+        .format('ddd, MMMM Do YYYY, h:mm:ss a');
 
-      var label = <div style={{textAlign: 'left'}}>
-        <div>Assigned To: {this.assignedTo(task)}</div>
-        <div>Last Modified: {dateModified}</div>
-      </div>;
+      var label = (
+        <div style={{textAlign: 'left'}}>
+          <div>
+            Assigned To: {this.assignedTo(task)}
+          </div>
+          <div>
+            Last Modified: {dateModified}
+          </div>
+        </div>
+      );
 
       markup.push(
         <SimpleTooltip label={label}>
@@ -178,11 +196,17 @@ var TestsTab = React.createClass({
         </SimpleTooltip>
       );
       if (index < linkedTasks.length - 1) {
-        markup.push(", ");
+        markup.push(', ');
       }
     });
 
-    return <span>{" ("}{markup}{")"}</span>;
+    return (
+      <span>
+        {' ('}
+        {markup}
+        {')'}
+      </span>
+    );
   },
 
   renderQuarantineTasks() {
@@ -224,33 +248,27 @@ var TestsTab = React.createClass({
       var style = {};
       if (task['status'] !== 'open') {
         style['textDecoration'] = 'line-through';
-      };
+      }
 
-      var taskMarkup = <SimpleTooltip label={task.statusName}>
-        <a href={task.uri} className="subtle" style={style} target="_blank">
-          [{task.objectName}]
-          {" "}
-          {task.title}
-        </a>
-      </SimpleTooltip>;
+      var taskMarkup = (
+        <SimpleTooltip label={task.statusName}>
+          <a href={task.uri} className="subtle" style={style} target="_blank">
+            [{task.objectName}] {task.title}
+          </a>
+        </SimpleTooltip>
+      );
 
       return [
         assignedTo,
         taskMarkup,
-        (task.dateModified - task.dateCreated > 60) ? 'Yes' : 'No',
+        task.dateModified - task.dateCreated > 60 ? 'Yes' : 'No',
         <TimeText format="X" time={task.dateModified} />
       ];
     });
 
-    var cellClasses = [
-      'nowrap',
-      'wide easyClick',
-      'nowrap',
-      'nowrap'
-    ];
+    var cellClasses = ['nowrap', 'wide easyClick', 'nowrap', 'nowrap'];
 
-    var explanation = 'Is dateUpdated more than 60 seconds later than ' +
-      'dateCreated?';
+    var explanation = 'Is dateUpdated more than 60 seconds later than ' + 'dateCreated?';
 
     var headers = [
       'Assigned',
@@ -261,18 +279,14 @@ var TestsTab = React.createClass({
       'Modified'
     ];
 
-    return <div>
-      <div className="marginBottomL">
-        This is a list of every task opened for a quarantined test within
-        this project.
+    return (
+      <div>
+        <div className="marginBottomL">
+          This is a list of every task opened for a quarantined test within this project.
+        </div>
+        <Grid colnum={4} headers={headers} cellClasses={cellClasses} data={data} />
       </div>
-      <Grid
-        colnum={4}
-        headers={headers}
-        cellClasses={cellClasses}
-        data={data}
-      />
-    </div>;
+    );
   },
 
   assignedTo(task) {

@@ -1,25 +1,26 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
+import LinkedStateMixin from 'react-addons-linked-state-mixin';
+import URI from 'urijs';
 
-import APINotLoaded from 'es6!display/not_loaded';
-import SectionHeader from 'es6!display/section_header';
-import { ChangesPage, APINotLoadedPage } from 'es6!display/page_chrome';
-import ChangesLinks from 'es6!display/changes/links';
-import * as FieldGroupMarkup from 'es6!display/field_group';
-import { FlashMessage, FAILURE } from 'es6!display/flash';
-import { Grid } from 'es6!display/grid';
-import Request from 'es6!display/request';
-import { Tabs, MenuUtils } from 'es6!display/menus';
-import { TimeText } from 'es6!display/time';
+import APINotLoaded from 'display/not_loaded';
+import SectionHeader from 'display/section_header';
+import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
+import ChangesLinks from 'display/changes/links';
+import * as FieldGroupMarkup from 'display/field_group';
+import {FlashMessage, FAILURE} from 'display/flash';
+import {Grid} from 'display/grid';
+import Request from 'display/request';
+import {Tabs, MenuUtils} from 'display/menus';
+import {TimeText} from 'display/time';
 
-import InteractiveData from 'es6!pages/helpers/interactive_data';
+import InteractiveData from 'pages/helpers/interactive_data';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
-import * as utils from 'es6!utils/utils';
+import * as utils from 'utils/utils';
 
 let AdminPage = React.createClass({
-
-  mixins: [React.addons.LinkedStateMixin],
+  mixins: [LinkedStateMixin],
 
   menuItems: [
     'Projects',
@@ -27,18 +28,20 @@ let AdminPage = React.createClass({
     'Repositories',
     'New Repository',
     'Users',
-    'Message',
+    'Message'
   ],
 
   getInitialState: function() {
     return {
-      selectedItem: null, // set in componentWillMount
-    }
+      selectedItem: null // set in componentWillMount
+    };
   },
 
   componentWillMount: function() {
     let selectedItemFromHash = MenuUtils.selectItemFromHash(
-      window.location.hash, this.menuItems);
+      window.location.hash,
+      this.menuItems
+    );
 
     // when we first came to this page, which tab was shown? Used by the
     // initial data fetching within tabs
@@ -49,11 +52,9 @@ let AdminPage = React.createClass({
       repositoriesInteractive: InteractiveData(
         this,
         'repositoriesInteractive',
-        '/api/0/repositories/?status='),
-      usersInteractive: InteractiveData(
-        this,
-        'usersInteractive',
-        '/api/0/users/'),
+        '/api/0/repositories/?status='
+      ),
+      usersInteractive: InteractiveData(this, 'usersInteractive', '/api/0/users/')
     });
   },
 
@@ -77,17 +78,19 @@ let AdminPage = React.createClass({
       return <APINotLoadedPage calls={this.state.projects} />;
     }
 
-    let title = 'Admin Panel'
+    let title = 'Admin Panel';
     utils.setPageTitle(title);
 
     // render menu
     let selectedItem = this.state.selectedItem;
 
-    let menu = <Tabs
-      items={this.menuItems}
-      selectedItem={selectedItem}
-      onClick={MenuUtils.onClick(this, selectedItem)}
-    />;
+    let menu = (
+      <Tabs
+        items={this.menuItems}
+        selectedItem={selectedItem}
+        onClick={MenuUtils.onClick(this, selectedItem)}
+      />
+    );
 
     let content = null;
     switch (selectedItem) {
@@ -110,17 +113,25 @@ let AdminPage = React.createClass({
         if (!api.isLoaded(this.state.message)) {
           return <APINotLoadedPage calls={this.state.message} />;
         }
-        content = <AdminMessageFieldGroup message={this.state.message.getReturnedData()} />;
+        content = (
+          <AdminMessageFieldGroup message={this.state.message.getReturnedData()} />
+        );
         break;
       default:
         throw 'unreachable';
     }
 
-    return <ChangesPage highlight="Projects">
-      <SectionHeader>{title}</SectionHeader>
-      {menu}
-      <div className="marginTopS">{content}</div>
-    </ChangesPage>;
+    return (
+      <ChangesPage highlight="Projects">
+        <SectionHeader>
+          {title}
+        </SectionHeader>
+        {menu}
+        <div className="marginTopS">
+          {content}
+        </div>
+      </ChangesPage>
+    );
   },
 
   renderProjects: function() {
@@ -138,14 +149,16 @@ let AdminPage = React.createClass({
       ]);
     });
 
-    return <div>
-      <Grid
-        colnum={3}
-        className="marginBottomM marginTopM"
-        data={rows}
-        headers={['Name', 'Status', 'Creation Date']}
-      />
-    </div>;
+    return (
+      <div>
+        <Grid
+          colnum={3}
+          className="marginBottomM marginTopM"
+          data={rows}
+          headers={['Name', 'Status', 'Creation Date']}
+        />
+      </div>
+    );
   },
 
   renderRepositories: function() {
@@ -166,17 +179,21 @@ let AdminPage = React.createClass({
     });
 
     var pagingLinks = interactive.getPagingLinks({
-      use_next_previous: true,
+      use_next_previous: true
     });
-    return <div>
-      <Grid
-        colnum={4}
-        className="marginBottomM marginTopM"
-        data={rows}
-        headers={['Name', 'Status', 'Backend', 'Created']}
-      />
-      <div className="marginTopM marginBottomM">{pagingLinks}</div>
-    </div>;
+    return (
+      <div>
+        <Grid
+          colnum={4}
+          className="marginBottomM marginTopM"
+          data={rows}
+          headers={['Name', 'Status', 'Backend', 'Created']}
+        />
+        <div className="marginTopM marginBottomM">
+          {pagingLinks}
+        </div>
+      </div>
+    );
   },
 
   renderUsers: function() {
@@ -193,43 +210,45 @@ let AdminPage = React.createClass({
       let isAdmin = user.isAdmin ? 'Yes' : 'No';
       params['is_admin'] = !user.isAdmin;
       let endpoint = `/api/0/users/${user.id}/`;
-      let post = <Request
-                    parentElem={this}
-                    name='make_admin'
-                    endpoint={endpoint}
-                    method="post"
-                    params={params}>
-                      <span>
-                        {isAdmin}
-                      </span>
-                 </Request>;
+      let post = (
+        <Request
+          parentElem={this}
+          name="make_admin"
+          endpoint={endpoint}
+          method="post"
+          params={params}>
+          <span>
+            {isAdmin}
+          </span>
+        </Request>
+      );
 
-      let projects = user.project_permissions == null ? '' : user.project_permissions.join(', ')
-      rows.push([
-        user.email,
-        <TimeText time={user.dateCreated} />,
-        post,
-        projects,
-      ]);
+      let projects =
+        user.project_permissions == null ? '' : user.project_permissions.join(', ');
+      rows.push([user.email, <TimeText time={user.dateCreated} />, post, projects]);
     });
 
     var pagingLinks = interactive.getPagingLinks({
-      use_next_previous: true,
+      use_next_previous: true
     });
-    return <div>
-      <Grid
-        colnum={4}
-        className="marginBottomM marginTopM"
-        data={rows}
-        headers={['Email', 'Created', 'Admin?', 'Projects With Admin Access']}
-      />
-      <div className="marginTopM marginBottomM">{pagingLinks}</div>
-    </div>;
-  },
+    return (
+      <div>
+        <Grid
+          colnum={4}
+          className="marginBottomM marginTopM"
+          data={rows}
+          headers={['Email', 'Created', 'Admin?', 'Projects With Admin Access']}
+        />
+        <div className="marginTopM marginBottomM">
+          {pagingLinks}
+        </div>
+      </div>
+    );
+  }
 });
 
 let NewProjectFieldGroup = React.createClass({
-  mixins: [React.addons.LinkedStateMixin, FieldGroupMarkup.DiffFormMixin],
+  mixins: [LinkedStateMixin, FieldGroupMarkup.DiffFormMixin],
 
   getInitialState: function() {
     return {};
@@ -242,17 +261,21 @@ let NewProjectFieldGroup = React.createClass({
   saveSettings: function() {
     let state = this.state;
     let project_params = {
-      'name': state.name,
-      'repository': state.repository,
+      name: state.name,
+      repository: state.repository
     };
 
-    let saveCallback = FieldGroupMarkup.redirectCallback(
-      this, project => {
-        this.updateSavedFormState();
-        return URI(ChangesLinks.projectAdminHref(project));
-      });
+    let saveCallback = FieldGroupMarkup.redirectCallback(this, project => {
+      this.updateSavedFormState();
+      return URI(ChangesLinks.projectAdminHref(project));
+    });
 
-    api.make_api_ajax_post('/api/0/projects/', project_params, saveCallback, saveCallback);
+    api.make_api_ajax_post(
+      '/api/0/projects/',
+      project_params,
+      saveCallback,
+      saveCallback
+    );
   },
 
   componentDidMount: function() {
@@ -261,14 +284,16 @@ let NewProjectFieldGroup = React.createClass({
 
   render: function() {
     let form = [
-      { sectionTitle: 'New Project', fields: [
-        {type: 'text', display: 'Name', link: 'name'},
-        {type: 'text', display: 'Repository', link: 'repository'},
+      {
+        sectionTitle: 'New Project',
+        fields: [
+          {type: 'text', display: 'Name', link: 'name'},
+          {type: 'text', display: 'Repository', link: 'repository'}
         ]
       }
     ];
 
-    let fieldMarkup = FieldGroupMarkup.create(form, "Save Project", this, []);
+    let fieldMarkup = FieldGroupMarkup.create(form, 'Save Project', this, []);
     let error = this.state.error;
     if (error) {
       error = JSON.parse(error);
@@ -278,15 +303,19 @@ let NewProjectFieldGroup = React.createClass({
     }
 
     let errorMessage = error ? <FlashMessage message={error} type={FAILURE} /> : null;
-    return <div>
-             <div>{fieldMarkup}</div>
-             {errorMessage}
-           </div>;
-  },
-})
+    return (
+      <div>
+        <div>
+          {fieldMarkup}
+        </div>
+        {errorMessage}
+      </div>
+    );
+  }
+});
 
 let NewRepoFieldGroup = React.createClass({
-  mixins: [React.addons.LinkedStateMixin, FieldGroupMarkup.DiffFormMixin],
+  mixins: [LinkedStateMixin, FieldGroupMarkup.DiffFormMixin],
 
   getInitialState: function() {
     return {};
@@ -298,17 +327,21 @@ let NewRepoFieldGroup = React.createClass({
 
   saveSettings: function() {
     let repo_params = {
-      'url': this.state.url,
-      'backend': this.state.backend,
+      url: this.state.url,
+      backend: this.state.backend
     };
 
-    let saveCallback = FieldGroupMarkup.redirectCallback(
-      this, repo => {
-        this.updateSavedFormState();
-        return URI(ChangesLinks.repositoryAdminHref(repo));
-      });
+    let saveCallback = FieldGroupMarkup.redirectCallback(this, repo => {
+      this.updateSavedFormState();
+      return URI(ChangesLinks.repositoryAdminHref(repo));
+    });
 
-    api.make_api_ajax_post('/api/0/repositories/', repo_params, saveCallback, saveCallback);
+    api.make_api_ajax_post(
+      '/api/0/repositories/',
+      repo_params,
+      saveCallback,
+      saveCallback
+    );
   },
 
   componentDidMount: function() {
@@ -316,31 +349,42 @@ let NewRepoFieldGroup = React.createClass({
   },
 
   render: function() {
-    let backendOptions = {'Unknown': 'unknown', 'Git': 'git', 'Mercurial': 'hg'};
+    let backendOptions = {Unknown: 'unknown', Git: 'git', Mercurial: 'hg'};
     let form = [
-      { sectionTitle: 'New Repository', fields: [
-        {type: 'text', display: 'URL', link: 'url'},
-        {type: 'select', display: 'Backend', link: 'backend', options: backendOptions},
+      {
+        sectionTitle: 'New Repository',
+        fields: [
+          {type: 'text', display: 'URL', link: 'url'},
+          {
+            type: 'select',
+            display: 'Backend',
+            link: 'backend',
+            options: backendOptions
+          }
         ]
       }
     ];
 
-    let fieldMarkup = FieldGroupMarkup.create(form, "Create Repository", this, []);
-    return <div>{fieldMarkup}</div>;
-  },
-})
+    let fieldMarkup = FieldGroupMarkup.create(form, 'Create Repository', this, []);
+    return (
+      <div>
+        {fieldMarkup}
+      </div>
+    );
+  }
+});
 
 let AdminMessageFieldGroup = React.createClass({
-  mixins: [React.addons.LinkedStateMixin, FieldGroupMarkup.DiffFormMixin],
+  mixins: [LinkedStateMixin, FieldGroupMarkup.DiffFormMixin],
 
   propTypes: {
-    message: PropTypes.object.isRequired,
+    message: PropTypes.object.isRequired
   },
 
   getInitialState: function() {
     return {
       messageText: this.props.message.message,
-      error: "",
+      error: ''
     };
   },
 
@@ -350,17 +394,22 @@ let AdminMessageFieldGroup = React.createClass({
 
   saveSettings: function() {
     let message_params = {
-      'message': this.state.messageText,
+      message: this.state.messageText
     };
     var saveCallback = (response, was_success) => {
       if (was_success) {
-        this.setState({'error': ""}, this.updateSavedFormState);
+        this.setState({error: ''}, this.updateSavedFormState);
       } else {
-        this.setState({'error': response.responseText});
+        this.setState({error: response.responseText});
       }
-    }
+    };
 
-    api.make_api_ajax_post('/api/0/messages/', message_params, saveCallback, saveCallback);
+    api.make_api_ajax_post(
+      '/api/0/messages/',
+      message_params,
+      saveCallback,
+      saveCallback
+    );
   },
 
   componentDidMount: function() {
@@ -368,18 +417,26 @@ let AdminMessageFieldGroup = React.createClass({
   },
 
   form: [
-    { sectionTitle: 'Message',
-      fields: [{type: 'text', display: '', link: 'messageText'},] }
+    {
+      sectionTitle: 'Message',
+      fields: [{type: 'text', display: '', link: 'messageText'}]
+    }
   ],
 
   render: function() {
-    let fieldMarkup = FieldGroupMarkup.create(this.form, "Save Message", this);
+    let fieldMarkup = FieldGroupMarkup.create(this.form, 'Save Message', this);
     let error = this.state.error;
-    return <div>
-            <div>{fieldMarkup}</div>
-            <div>{error}</div>
-           </div>;
-  },
-})
+    return (
+      <div>
+        <div>
+          {fieldMarkup}
+        </div>
+        <div>
+          {error}
+        </div>
+      </div>
+    );
+  }
+});
 
 export default AdminPage;

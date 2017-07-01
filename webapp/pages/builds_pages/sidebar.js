@@ -1,16 +1,23 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 import moment from 'moment';
+import URI from 'urijs';
 
-import ChangesLinks from 'es6!display/changes/links';
-import { TimeText, display_duration } from 'es6!display/time';
-import { buildSummaryText, manyBuildsSummaryText, get_build_cause } from 'es6!display/changes/build_text';
-import { buildsForLastCodeChange } from 'es6!display/changes/builds';
-import { get_runnable_condition,
-         get_runnables_summary_condition,
-         is_waiting,
-         ConditionDot } from 'es6!display/changes/build_conditions';
+import ChangesLinks from 'display/changes/links';
+import {TimeText, display_duration} from 'display/time';
+import {
+  buildSummaryText,
+  manyBuildsSummaryText,
+  get_build_cause
+} from 'display/changes/build_text';
+import {buildsForLastCodeChange} from 'display/changes/builds';
+import {
+  get_runnable_condition,
+  get_runnables_summary_condition,
+  is_waiting,
+  ConditionDot
+} from 'display/changes/build_conditions';
 
-import * as utils from 'es6!utils/utils';
+import * as utils from 'utils/utils';
 
 import classNames from 'classnames';
 
@@ -20,7 +27,6 @@ import classNames from 'classnames';
  */
 
 var Sidebar = React.createClass({
-
   propTypes: {
     // list of builds to render in side bar
     builds: PropTypes.array,
@@ -35,22 +41,24 @@ var Sidebar = React.createClass({
     activeBuildID: PropTypes.string,
 
     // the parent page element. Sidebar clicks change its state
-    pageElem: PropTypes.object,
+    pageElem: PropTypes.object
   },
 
   render: function() {
-    return <div className="buildsSidebar fixedClass">
-      <div className="sidebarBorder">
-        {this.renderBuildsList()}
+    return (
+      <div className="buildsSidebar fixedClass">
+        <div className="sidebarBorder">
+          {this.renderBuildsList()}
+        </div>
+        {this.renderSection('Links', this.renderLinksToCode())}
       </div>
-      {this.renderSection('Links', this.renderLinksToCode())}
-    </div>;
+    );
   },
 
   renderBuildsList: function() {
     var type = this.props.type;
 
-    var content = "No content yet";
+    var content = 'No content yet';
     if (type === 'commit') {
       content = this.renderBuildsForCommit();
     } else if (type === 'diff') {
@@ -59,30 +67,38 @@ var Sidebar = React.createClass({
       throw 'unreachable';
     }
 
-    return <div>
-      {content}
-    </div>;
+    return (
+      <div>
+        {content}
+      </div>
+    );
   },
 
   renderBuildsForCommit: function() {
     var builds = this.props.builds,
       source = this.props.targetData;
 
-    var label = <span>
-      Committed {"("}<TimeText time={source.revision.dateCommitted} />{")"}
-    </span>;
+    var label = (
+      <span>
+        Committed {'('}
+        <TimeText time={source.revision.dateCommitted} />
+        {')'}
+      </span>
+    );
 
     var content = this.noBuildsMarkup();
     if (builds) {
       content = this.renderBuilds(builds, true);
     }
 
-    return <div>
-      <div className="marginTopL">
-        {this.renderLatestItem(builds)}
+    return (
+      <div>
+        <div className="marginTopL">
+          {this.renderLatestItem(builds)}
+        </div>
+        {this.renderSection(label, content)}
       </div>
-      {this.renderSection(label, content)}
-    </div>;
+    );
   },
 
   renderBuildsForDiff: function() {
@@ -108,50 +124,61 @@ var Sidebar = React.createClass({
 
       if (single_diff_id > original_single_diff_id) {
         if (changes_data) {
-          var section_header = <span>
-            Diff Update #{diff_update_num}
-            {" ("}
-            <TimeText time={moment.utc(changes_data['dateCreated'])} />
-            {")"}
-          </span>;
+          var section_header = (
+            <span>
+              Diff Update #{diff_update_num}
+              {' ('}
+              <TimeText time={moment.utc(changes_data['dateCreated'])} />
+              {')'}
+            </span>
+          );
         } else {
-          var section_header = <span>Diff Update #{diff_update_num}</span>
+          var section_header = (
+            <span>
+              Diff Update #{diff_update_num}
+            </span>
+          );
         }
       } else {
-        var section_header = <span>
-          Created D{diff_data.id}{" ("}
-          <TimeText time={moment.unix(diff_data.dateCreated).toString()} />
-          {")"}
-        </span>;
+        var section_header = (
+          <span>
+            Created D{diff_data.id}
+            {' ('}
+            <TimeText time={moment.unix(diff_data.dateCreated).toString()} />
+            {')'}
+          </span>
+        );
       }
       var section_content = this.noBuildsMarkup();
       if (diff_builds) {
-        section_content = this.renderBuilds(
-          diff_builds,
-          !hasRenderedSectionWithBuilds);
+        section_content = this.renderBuilds(diff_builds, !hasRenderedSectionWithBuilds);
         hasRenderedSectionWithBuilds = true;
       }
 
       sections.push(this.renderSection(section_header, section_content));
     });
 
-    return <div>
-      <div className="marginTopL">
-        {this.renderLatestItem(builds)}
+    return (
+      <div>
+        <div className="marginTopL">
+          {this.renderLatestItem(builds)}
+        </div>
+        {sections}
       </div>
-      {sections}
-    </div>;
+    );
   },
 
   noBuildsMarkup: function() {
-    return <div className="buildsSidebarNoBuilds">
-      <i className="fa fa-exclamation-circle" />
-      <span className="marginLeftS">No builds</span>
-    </div>;
+    return (
+      <div className="buildsSidebarNoBuilds">
+        <i className="fa fa-exclamation-circle" />
+        <span className="marginLeftS">No builds</span>
+      </div>
+    );
   },
 
   getLatestPerProject: function(builds) {
-    // if its a diff, only get builds from the most recent update that had 
+    // if its a diff, only get builds from the most recent update that had
     // builds
     builds = buildsForLastCodeChange(builds);
 
@@ -169,8 +196,7 @@ var Sidebar = React.createClass({
     var subtext = manyBuildsSummaryText(latestPerProj);
 
     var summaryCondition = get_runnables_summary_condition(latestPerProj);
-    var subtextExtraClass = summaryCondition.indexOf('failed') === 0 ?
-      'redGrayMix' : '';
+    var subtextExtraClass = summaryCondition.indexOf('failed') === 0 ? 'redGrayMix' : '';
 
     return this.renderBuildSideItem(
       <ConditionDot
@@ -184,7 +210,7 @@ var Sidebar = React.createClass({
       subtextExtraClass,
       null,
       !this.props.activeBuildID,
-      evt => this.props.pageElem.setState({ activeBuildID: null })
+      evt => this.props.pageElem.setState({activeBuildID: null})
     );
   },
 
@@ -192,17 +218,16 @@ var Sidebar = React.createClass({
     if (builds === undefined) {
       return null;
     }
-    builds = _.chain(builds)
-      .sortBy(b => b.dateCreated)
-      .reverse()
-      .value();
-  
+    builds = _.chain(builds).sortBy(b => b.dateCreated).reverse().value();
+
     var latestPerProj = this.getLatestPerProject(builds);
     var shouldDim = build => {
-      if (!hideNonLatest) { return false; }
+      if (!hideNonLatest) {
+        return false;
+      }
       var inLatest = _.filter(latestPerProj, b => b.id === build.id);
-      return !(inLatest.length > 0);  // dim if not in latest
-    }
+      return !(inLatest.length > 0); // dim if not in latest
+    };
 
     var on_click = build_id => {
       return evt => {
@@ -214,33 +239,41 @@ var Sidebar = React.createClass({
 
     var entries = _.map(builds, b => {
       var buildCondition = get_runnable_condition(b);
-      var subtextExtraClass = buildCondition.indexOf('failed') === 0 ?
-        'redGrayMix' : null;
+      var subtextExtraClass =
+        buildCondition.indexOf('failed') === 0 ? 'redGrayMix' : null;
 
       return this.renderBuildSideItem(
-        <ConditionDot
-          condition={buildCondition}
-          size="medium"
-        />,
+        <ConditionDot condition={buildCondition} size="medium" />,
         utils.truncate(b.project.name, 26),
-        is_waiting(buildCondition) ?
-          'Running' : 
-          display_duration(b.duration / 1000),
+        is_waiting(buildCondition) ? 'Running' : display_duration(b.duration / 1000),
         `${buildSummaryText(b)}`,
         subtextExtraClass,
         get_build_cause(b),
         this.props.activeBuildID === b.id,
         on_click(b.id),
-        shouldDim(b));
+        shouldDim(b)
+      );
     });
 
-    return <div>{entries}</div>;
+    return (
+      <div>
+        {entries}
+      </div>
+    );
   },
 
   // TODO: ok, this should probably be a component or something...
-  renderBuildSideItem: function(condition_dot, text, time, subtext,
-    subtext_extra_class, right_subtext, is_selected, on_click, dimmed = false) {
-
+  renderBuildSideItem: function(
+    condition_dot,
+    text,
+    time,
+    subtext,
+    subtext_extra_class,
+    right_subtext,
+    is_selected,
+    on_click,
+    dimmed = false
+  ) {
     var classes = classNames({
       buildsSideItem: true,
       selected: is_selected
@@ -248,46 +281,57 @@ var Sidebar = React.createClass({
 
     if (right_subtext) {
       var className = 'floatR marginRightM subText';
-      right_subtext = <div className={className}>
-        {right_subtext}
-      </div>;
+      right_subtext = (
+        <div className={className}>
+          {right_subtext}
+        </div>
+      );
     }
 
     var style = null;
     if (dimmed) {
-      style = { opacity: 0.5 };
+      style = {opacity: 0.5};
     }
 
-    return <div className={classes} onClick={on_click} style={style}>
-      <div className="sideItemDot">
-        {condition_dot}
-      </div>
-      <div>
-        <div className="inlineBlock">{text}</div>
-        <div className="sidebarTime">{time}</div>
-        <div className={"subText " + subtext_extra_class}>
-          <span className="subtextStatus">{subtext}</span>
-          {right_subtext}
+    return (
+      <div className={classes} onClick={on_click} style={style}>
+        <div className="sideItemDot">
+          {condition_dot}
+        </div>
+        <div>
+          <div className="inlineBlock">
+            {text}
+          </div>
+          <div className="sidebarTime">
+            {time}
+          </div>
+          <div className={'subText ' + subtext_extra_class}>
+            <span className="subtextStatus">
+              {subtext}
+            </span>
+            {right_subtext}
+          </div>
         </div>
       </div>
-    </div>;
+    );
   },
 
   renderLinksToCode() {
-    if (this.props.type === "diff") {
+    if (this.props.type === 'diff') {
       var diffData = this.props.targetData;
-      return <div className="marginBottomL"> <a
-        className="external"
-        href={diffData.uri}
-        target="_blank">
-        <i className="fa fa-pencil marginRightS" style={{width: 15}} />
-        View Differential Revision
-      </a> </div>;
+      return (
+        <div className="marginBottomL">
+          {' '}<a className="external" href={diffData.uri} target="_blank">
+            <i className="fa fa-pencil marginRightS" style={{width: 15}} />
+            View Differential Revision
+          </a>{' '}
+        </div>
+      );
     } else {
       var source = this.props.targetData;
 
       var diffHref = null;
-      URI.withinString(source.revision.message, (url) => {
+      URI.withinString(source.revision.message, url => {
         if (URI(url).path().match(/D[0-9]+/)) {
           // its a phabricator diff
           diffHref = url;
@@ -295,45 +339,60 @@ var Sidebar = React.createClass({
         return url;
       });
 
-      var codeLink = <div> <a
-        href={`/code/${this.props.targetData.id}`}
-        target="_blank">
-        <i className="fa fa-code marginRightS" style={{width: 15}} />
-        View Code for this Build
-      </a> </div>;
+      var codeLink = (
+        <div>
+          {' '}<a href={`/code/${this.props.targetData.id}`} target="_blank">
+            <i className="fa fa-code marginRightS" style={{width: 15}} />
+            View Code for this Build
+          </a>{' '}
+        </div>
+      );
 
-      var commitLink = <div className="marginTopS"> <a
-        className="external"
-        href={ChangesLinks.phabCommitHref(source.revision)}
-        target="_blank">
-        <i className="fa fa-code marginRightS" style={{width: 15}} />
-        View Commit
-      </a> </div>;
+      var commitLink = (
+        <div className="marginTopS">
+          {' '}<a
+            className="external"
+            href={ChangesLinks.phabCommitHref(source.revision)}
+            target="_blank">
+            <i className="fa fa-code marginRightS" style={{width: 15}} />
+            View Commit
+          </a>{' '}
+        </div>
+      );
 
       var diffLink = null;
       if (diffHref) {
-        diffLink = <div className="marginTopS"> <a
-          className="external"
-          href={diffHref}
-          target="_blank">
-          <i className="fa fa-pencil marginRightS" style={{width: 15}} />
-          View Original Differential Revision
-        </a> </div>;
+        diffLink = (
+          <div className="marginTopS">
+            {' '}<a className="external" href={diffHref} target="_blank">
+              <i className="fa fa-pencil marginRightS" style={{width: 15}} />
+              View Original Differential Revision
+            </a>{' '}
+          </div>
+        );
       }
 
-      return <div>
-        {codeLink}
-        {commitLink}
-        {diffLink}
-      </div>
+      return (
+        <div>
+          {codeLink}
+          {commitLink}
+          {diffLink}
+        </div>
+      );
     }
   },
 
   renderSection: function(header, content) {
-    return <div className="marginTopL">
-      <div className="buildsSideSectionHeader">{header}</div>
-      <div>{content}</div>
-    </div>;
+    return (
+      <div className="marginTopL">
+        <div className="buildsSideSectionHeader">
+          {header}
+        </div>
+        <div>
+          {content}
+        </div>
+      </div>
+    );
   }
 });
 

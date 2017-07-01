@@ -1,21 +1,20 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 
-import ChangesLinks from 'es6!display/changes/links';
-import SimpleTooltip from 'es6!display/simple_tooltip';
-import { ProgrammingError } from 'es6!display/errors';
+import ChangesLinks from 'display/changes/links';
+import SimpleTooltip from 'display/simple_tooltip';
+import {ProgrammingError} from 'display/errors';
 import {
   get_runnable_condition,
   get_runnable_condition_color_cls,
   get_runnable_condition_short_text
-} from 'es6!display/changes/build_conditions';
+} from 'display/changes/build_conditions';
 
 /*
  * Renders a small bar chart of a series of builds/tests/maybe others
  */
-export var ChangesChart = React.createClass({
+export const ChangesChart = React.createClass({
+  MAX_CHART_HEIGHT: 40, // pixels
 
-  MAX_CHART_HEIGHT: 40,  // pixels
-  
   propTypes: {
     type: PropTypes.oneOf(['build', 'test']).isRequired,
     runnables: PropTypes.array.isRequired,
@@ -24,28 +23,34 @@ export var ChangesChart = React.createClass({
   },
 
   getDefaultProps() {
-    return { enableLatest: true };
+    return {enableLatest: true};
   },
 
   render() {
-    var { runnables, className, } = this.props;
+    var {runnables, className} = this.props;
 
     // we'll render bar heights relative to this
     // We sortBy(identity) because using sort() sorts by string representation, which is wrong.
-    let longestDuration = _.chain(runnables).compact().pluck('duration').compact().sortBy(_.identity).last().value();
+    let longestDuration = _.chain(runnables)
+      .compact()
+      .pluck('duration')
+      .compact()
+      .sortBy(_.identity)
+      .last()
+      .value();
 
     var content = _.map(this.props.runnables, (runnable, idx) => {
       var no_duration = runnable && !runnable.duration && runnable.duration === 0;
       if (_.isEmpty(runnable) || no_duration) {
         // would be nice to still show a tooltip here...
-        return <div key={(runnable && runnable.id) || ("empty:" + idx)}
-          className="chartBarColumn"
-          style={{ paddingTop: this.MAX_CHART_HEIGHT - 2 }}>
+        return (
           <div
-            className="emptyChartBar"
-            style={{height: 2}}
-          />
-        </div>;
+            key={(runnable && runnable.id) || 'empty:' + idx}
+            className="chartBarColumn"
+            style={{paddingTop: this.MAX_CHART_HEIGHT - 2}}>
+            <div className="emptyChartBar" style={{height: 2}} />
+          </div>
+        );
       }
 
       var heightPercentage = runnable.duration / longestDuration;
@@ -57,7 +62,8 @@ export var ChangesChart = React.createClass({
       var bgColor = get_runnable_condition_color_cls(condition, true);
       var label = get_runnable_condition_short_text(condition, true);
 
-      var tooltipText = null, href = null;
+      var tooltipText = null,
+        href = null;
       if (this.props.type === 'build') {
         // TODO: show more details about the build
         tooltipText = runnable.name;
@@ -67,32 +73,37 @@ export var ChangesChart = React.createClass({
         tooltipText = runnable.result.name;
         href = ChangesLinks.buildTestHref(runnable.job.build.id, runnable);
       } else {
-        return <ProgrammingError>
-          Unknown type {this.props.type}
-        </ProgrammingError>;
+        return (
+          <ProgrammingError>
+            Unknown type {this.props.type}
+          </ProgrammingError>
+        );
       }
 
-      return <SimpleTooltip label={tooltipText} placement="top" key={runnable.id}>
-        <a 
-          className="chartBarColumn" 
-          href={href}
-          style={{ paddingTop: columnPadding }}>
-          <div 
-            className={"chartBar " + bgColor}
-            alt={label}
-            title={label}
-            style={{ height: barHeight }}
-          />
-        </a>
-      </SimpleTooltip>;
+      return (
+        <SimpleTooltip label={tooltipText} placement="top" key={runnable.id}>
+          <a className="chartBarColumn" href={href} style={{paddingTop: columnPadding}}>
+            <div
+              className={'chartBar ' + bgColor}
+              alt={label}
+              title={label}
+              style={{height: barHeight}}
+            />
+          </a>
+        </SimpleTooltip>
+      );
     });
 
     if (this.props.enableLatest) {
       content.unshift(<LatestWidget key="latest" />);
     }
 
-    var className = " changesChart " + (className || "");
-    return <div className={className}>{content}</div>;
+    var className = ' changesChart ' + (className || '');
+    return (
+      <div className={className}>
+        {content}
+      </div>
+    );
   }
 });
 
@@ -102,7 +113,7 @@ var LatestWidget = React.createClass({
       position: 'absolute',
       marginLeft: -12,
       marginTop: -18,
-      fontSize: 'xx-small',
+      fontSize: 'xx-small'
     };
 
     var spanStyle = {
@@ -119,9 +130,11 @@ var LatestWidget = React.createClass({
       marginTop: -4
     };
 
-    return <div style={divStyle}>
-      <span style={spanStyle}>Latest</span>
-      <i style={caretStyle} className="fa fa-caret-down" />
-    </div>;
+    return (
+      <div style={divStyle}>
+        <span style={spanStyle}>Latest</span>
+        <i style={caretStyle} className="fa fa-caret-down" />
+      </div>
+    );
   }
 });

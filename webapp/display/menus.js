@@ -1,6 +1,7 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
+import URI from 'urijs';
 
-import Examples from 'es6!display/examples';
+import Examples from 'display/examples';
 
 import classNames from 'classnames';
 
@@ -8,8 +9,7 @@ import classNames from 'classnames';
  * Menu 1. Simple, items separated with |.
  * Commits | Every Build | Tests | More Information
  */
-export var Menu1 = React.createClass({
-
+export const Menu1 = React.createClass({
   propTypes: {
     // Names of the menu items
     items: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -24,11 +24,11 @@ export var Menu1 = React.createClass({
       items: [],
       selectedItem: '',
       onClick: item => console.log('no onclick handler for menu')
-    }
+    };
   },
 
   render: function() {
-    var { items, selectedItem, onClick, ...others} = this.props;
+    var {items, selectedItem, onClick, ...others} = this.props;
 
     var item_onclick = (item, clickEvent) => onClick(item, clickEvent);
 
@@ -41,32 +41,32 @@ export var Menu1 = React.createClass({
       });
 
       item_markup.push(
-        <div
-          key={text}
-          className={classes}
-          onClick={_.partial(item_onclick, text)}>
+        <div key={text} className={classes} onClick={_.partial(item_onclick, text)}>
           {text}
         </div>
       );
 
       if (index < items.length - 1) {
         item_markup.push(
-          <div className="inlineBlock" key={"sep-" + index}>
-            {"\u22C5"}
+          <div className="inlineBlock" key={'sep-' + index}>
+            {'\u22C5'}
           </div>
         );
       }
     });
 
-    return <div {...others}>{item_markup}</div>;
+    return (
+      <div {...others}>
+        {item_markup}
+      </div>
+    );
   }
 });
 
 /*
  * Lightweight tabs menu
  */
-export var Tabs = React.createClass({
-
+export const Tabs = React.createClass({
   propTypes: {
     // Names of the menu items
     items: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -81,11 +81,11 @@ export var Tabs = React.createClass({
       items: [],
       selectedItem: '',
       onClick: item => console.log('no onclick handler for menu')
-    }
+    };
   },
 
   render: function() {
-    var { items, selectedItem, onClick, className, ...others} = this.props;
+    var {items, selectedItem, onClick, className, ...others} = this.props;
 
     var item_markup = _.map(items, (text, index) => {
       var classes = classNames({
@@ -95,23 +95,28 @@ export var Tabs = React.createClass({
         selectedTabsItem: selectedItem === text
       });
 
-      return <div
-        className={classes}
-        key={text}
-        onClick={_.partial(onClick, text)}>
-        <div className="tabsItemText">{text}</div>
-      </div>;
+      return (
+        <div className={classes} key={text} onClick={_.partial(onClick, text)}>
+          <div className="tabsItemText">
+            {text}
+          </div>
+        </div>
+      );
     });
 
-    className = (className || "") + " tabs";
-    return <div>
-      <div className={className} {...others}>{item_markup}</div>
-      <div className="tabsBottomBorder" />
-    </div>;
+    className = (className || '') + ' tabs';
+    return (
+      <div>
+        <div className={className} {...others}>
+          {item_markup}
+        </div>
+        <div className="tabsBottomBorder" />
+      </div>
+    );
   }
 });
 
-export var MenuUtils = {
+export const MenuUtils = {
   // call this from componentWillMount: it looks at the window hash parameter and
   // tells you whether you should use a different selectedTab
   selectItemFromHash: function(window_hash, items) {
@@ -124,8 +129,8 @@ export var MenuUtils = {
       // let's accept a bunch of hash variants
       hash_to_menu_item[i] = i;
       hash_to_menu_item[i.toLowerCase()] = i;
-      hash_to_menu_item[i.replace(/ /g, "")] = i;
-      hash_to_menu_item[i.toLowerCase().replace(/ /g, "")] = i;
+      hash_to_menu_item[i.replace(/ /g, '')] = i;
+      hash_to_menu_item[i.toLowerCase().replace(/ /g, '')] = i;
     });
 
     var hash = window_hash.substring(1);
@@ -148,7 +153,7 @@ export var MenuUtils = {
         return;
       }
 
-      window.location.hash = item.replace(/ /g, "");
+      window.location.hash = item.replace(/ /g, '');
       elem.setState({selectedItem: item});
     };
   },
@@ -166,18 +171,19 @@ export var MenuUtils = {
       window.history.replaceState(
         null,
         'switched tab',
-        URI(window.location.href).query(current_params));
+        URI(window.location.href).query(current_params)
+      );
 
       elem.setState({selectedItem: item});
     };
   }
-}
+};
 
 Examples.add('Menus', __ => {
   var MenuRenderer = React.createClass({
     getInitialState: function() {
       return {
-        selectedItem: 'Home',
+        selectedItem: 'Home'
       };
     },
 
@@ -187,7 +193,7 @@ Examples.add('Menus', __ => {
       };
 
       var menu_props = {
-        items: ["Home", "Section", "Another Section"],
+        items: ['Home', 'Section', 'Another Section'],
         selectedItem: this.state.selectedItem,
         onClick: onclick
       };
@@ -196,8 +202,5 @@ Examples.add('Menus', __ => {
     }
   });
 
-  return [
-    <MenuRenderer cls={Menu1} />,
-    <MenuRenderer cls={Tabs} />
-  ];
+  return [<MenuRenderer cls={Menu1} />, <MenuRenderer cls={Tabs} />];
 });

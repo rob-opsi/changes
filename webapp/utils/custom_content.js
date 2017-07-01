@@ -12,8 +12,7 @@
 function custom_content_hook(name, default_content, extra_data) {
   default_content = default_content || null;
 
-  var custom_content = window.changesCustomContent &&
-    window.changesCustomContent[name];
+  var custom_content = window.changesCustomContent && window.changesCustomContent[name];
 
   // empty string is a valid return value
   if (!custom_content && custom_content !== '') {

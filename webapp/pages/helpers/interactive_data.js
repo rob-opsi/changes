@@ -1,11 +1,11 @@
 import React from 'react';
 
-import ChangesUI from 'es6!display/changes/ui';
-import { Button } from 'es6!display/button';
+import ChangesUI from 'display/changes/ui';
+import {Button} from 'display/button';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
-import * as utils from 'es6!utils/utils';
+import * as utils from 'utils/utils';
 
 /*
  * A data structure for you to make a table of data interactive. It helps with
@@ -75,7 +75,7 @@ var InteractiveData = function(elem, elem_state_key, base_api_uri) {
     loadingParams: undefined,
     loadingData: undefined
   });
-}
+};
 
 /*
  * (static method) We usually mirror the API parameters in the page url. This
@@ -84,10 +84,9 @@ var InteractiveData = function(elem, elem_state_key, base_api_uri) {
  */
 InteractiveData.getParamsFromWindowUrl = function() {
   return URI(window.location.href).search(true);
-}
+};
 
 var InteractiveDataPrototype = {
-
   /*
    * Kicks off the initial data fetch. You can put this in componentDidMount,
    * or be lazier about when to fetch the data. Will only run at most once
@@ -98,21 +97,14 @@ var InteractiveDataPrototype = {
     }
 
     this.elem.setState(
-      utils.update_state_dict(
-        this.elemStateKey,
-        {
-          'hasRunInit': true,
-          'currentParams': initial_params || {}
-        }
-      ),
+      utils.update_state_dict(this.elemStateKey, {
+        hasRunInit: true,
+        currentParams: initial_params || {}
+      }),
       ___ => {
-        api.fetchMap(
-          this.elem,
-          this.elemStateKey,
-          {
-            'currentData': this._makeURI(initial_params)
-          }
-        );
+        api.fetchMap(this.elem, this.elemStateKey, {
+          currentData: this._makeURI(initial_params)
+        });
       }
     );
   },
@@ -131,8 +123,7 @@ var InteractiveDataPrototype = {
    * waiting on the initial data fetch or there was an error with that fetch.
    */
   hasNotLoadedInitialData() {
-    return this.loadingData === undefined &&
-        !api.isLoaded(this.currentData);
+    return this.loadingData === undefined && !api.isLoaded(this.currentData);
   },
 
   /*
@@ -141,17 +132,18 @@ var InteractiveDataPrototype = {
    * have data and the user paginates / used a control to update the data.
    */
   isLoadingUpdatedData() {
-    return !this.hasNotLoadedInitialData() &&
-        !api.isLoaded(this.currentData) &&
-        !api.isError(this.currentData);
+    return (
+      !this.hasNotLoadedInitialData() &&
+      !api.isLoaded(this.currentData) &&
+      !api.isError(this.currentData)
+    );
   },
 
   /*
    * Did we try to fetch new data and fail at it?
    */
   failedToLoadUpdatedData() {
-    return !this.hasNotLoadedInitialData() &&
-      api.isError(this.currentData);
+    return !this.hasNotLoadedInitialData() && api.isError(this.currentData);
   },
 
   /*
@@ -208,21 +200,18 @@ var InteractiveDataPrototype = {
     this.updateWindowUrl(params);
 
     // store the current data we're showing in loading before fetching new data
-    this.elem.setState(utils.update_state_dict(
-      this.elemStateKey,
-      {
+    this.elem.setState(
+      utils.update_state_dict(this.elemStateKey, {
         loadingParams: this.getCurrentParams(),
         loadingData: this.getDataToShow(),
 
         currentParams: params
-      }
-    ));
-
-    api.fetchMap(
-      this.elem,
-      this.elemStateKey,
-      { currentData: this._makeURI(params) }
+      })
     );
+
+    api.fetchMap(this.elem, this.elemStateKey, {
+      currentData: this._makeURI(params)
+    });
   },
 
   hasPreviousPage() {
@@ -247,12 +236,12 @@ var InteractiveDataPrototype = {
     // the paging api should return the same endpoint that we're already
     // using, so we'll just grab the get params
     var onClick = {
-      previous: params.previous && ChangesUI.leftClickOnly(
-          _.partial(this._paginate, params.previous)
-        ).bind(this),
-      next: params.next && ChangesUI.leftClickOnly(
-          _.partial(this._paginate, params.next)
-        ).bind(this)
+      previous:
+        params.previous &&
+        ChangesUI.leftClickOnly(_.partial(this._paginate, params.previous)).bind(this),
+      next:
+        params.next &&
+        ChangesUI.leftClickOnly(_.partial(this._paginate, params.next)).bind(this)
     };
 
     var links = [];
@@ -265,7 +254,7 @@ var InteractiveDataPrototype = {
         onClick={onClick.previous}
         disabled={!params.previous}
         href={params.previous ? URI(window.location.href).query(params.previous) : null}>
-        &laquo;{" "}{use_next_previous ? "Previous" : "Newer"}
+        &laquo; {use_next_previous ? 'Previous' : 'Newer'}
       </Button>
     );
 
@@ -277,7 +266,7 @@ var InteractiveDataPrototype = {
         onClick={onClick.next}
         disabled={!params.next}
         href={params.next ? URI(window.location.href).query(params.next) : null}>
-        {use_next_previous ? "Next" : "Older"}{" "}&raquo;
+        {use_next_previous ? 'Next' : 'Older'} &raquo;
       </Button>
     );
 
@@ -288,14 +277,15 @@ var InteractiveDataPrototype = {
   // This is almost always safe to call on re-render (w/o params)
   updateWindowUrl(params_to_use = null) {
     var params_to_use = params_to_use || this.getCurrentParams();
-    params_to_use = _.pick(params_to_use, v => v !== null)
+    params_to_use = _.pick(params_to_use, v => v !== null);
     var current_params = URI(window.location.href).search(true);
 
     if (!_.isEqual(params_to_use, current_params)) {
       window.history.replaceState(
         null,
         'changed data table',
-        URI(window.location.href).query(params_to_use));
+        URI(window.location.href).query(params_to_use)
+      );
     }
   },
 
@@ -303,7 +293,7 @@ var InteractiveDataPrototype = {
 
   // combines a set of parameters and the baseAPIUri
   _makeURI(params) {
-    var params_to_set = _.pick(params, v => v !== null)
+    var params_to_set = _.pick(params, v => v !== null);
     return URI(this.baseAPIUri)
       .setSearch(params_to_set) // other params on baseAPIUri are unaffected
       .toString();
@@ -312,9 +302,9 @@ var InteractiveDataPrototype = {
   // Implementation for getDataToShow/getCurrentParams
   _getDataAndParamsToShow() {
     if (this.isLoadingUpdatedData() || this.failedToLoadUpdatedData()) {
-      return { data: this.loadingData, params: this.loadingParams };
+      return {data: this.loadingData, params: this.loadingParams};
     }
-    return { data: this.currentData, params: this.currentParams };
+    return {data: this.currentData, params: this.currentParams};
   }
 };
 

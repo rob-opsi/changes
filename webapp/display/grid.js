@@ -1,13 +1,12 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
 
-import Examples from 'es6!display/examples';
-import { ProgrammingError } from 'es6!display/errors';
+import Examples from 'display/examples';
+import {ProgrammingError} from 'display/errors';
 
 import classNames from 'classnames';
 
-export var Grid = React.createClass({
-
+export const Grid = React.createClass({
   propTypes: {
     // how many columns should this grid have?
     colnum: PropTypes.number.isRequired,
@@ -19,7 +18,7 @@ export var Grid = React.createClass({
     // we have some magic classes (descriptions in css file): cellOverflow
     cellClasses: PropTypes.arrayOf(PropTypes.string),
     // whether to render dividers between rows
-    border: PropTypes.bool,
+    border: PropTypes.bool
 
     // ...
     // transfers other properties to rendered <table />
@@ -28,14 +27,14 @@ export var Grid = React.createClass({
   getDefaultProps: function() {
     return {
       data: [],
-      headers : [],
+      headers: [],
       cellClasses: [],
       border: true
-    }
+    };
   },
 
   render: function() {
-    var { data, headers, cellClasses, className, ...props} = this.props;  // eslint-disable-line
+    var {data, headers, cellClasses, className, ...props} = this.props; // eslint-disable-line
 
     // we only have something to render if we have >= 1 row or headers
     if (data.length === 0 && _.isEmpty(headers)) {
@@ -54,19 +53,21 @@ export var Grid = React.createClass({
 
     var rows = _.map(data, this.renderRow);
 
-    className = "grid " + (className || "");
+    className = 'grid ' + (className || '');
     if (!this.props.border) {
-      className += " noborder";
+      className += ' noborder';
     }
 
-    return <table {...props} className={className}>
-      <thead>
-        {header_row}
-      </thead>
-      <tbody>
-        {rows}
-      </tbody>
-    </table>;
+    return (
+      <table {...props} className={className}>
+        <thead>
+          {header_row}
+        </thead>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>
+    );
   },
 
   // row_index = -1 means header, otherwise its just which row
@@ -90,9 +91,11 @@ export var Grid = React.createClass({
       key = row.getKey();
       if (row.isUsingColspan()) {
         is_using_colspan = true;
-        cells = <td className="gridCell" colSpan={this.props.colnum}>
-          {row.getData()[0]}
-        </td>;
+        cells = (
+          <td className="gridCell" colSpan={this.props.colnum}>
+            {row.getData()[0]}
+          </td>
+        );
       } else {
         row = row.getData();
       }
@@ -100,10 +103,11 @@ export var Grid = React.createClass({
 
     if (!cells) {
       var cells = _.map(row, (cell, index) => {
-        if (row_index === -1) { // header cells
+        if (row_index === -1) {
+          // header cells
           className = 'nowrap gridCell';
         } else {
-          var className = (classes && classes[index]) || "";
+          var className = (classes && classes[index]) || '';
           className += ' gridCell';
         }
 
@@ -111,23 +115,27 @@ export var Grid = React.createClass({
         // it on click
         if (className.indexOf('cellOverflow') >= 0) {
           var onClick = evt => {
-            var newClass = evt.target.className
-              .replace("cellOverflowPointer", "") +
-              " cellOverflowExpanded";
+            var newClass =
+              evt.target.className.replace('cellOverflowPointer', '') +
+              ' cellOverflowExpanded';
 
             evt.target.className = newClass;
           };
 
-          var cell = <td className={className} onClick={onClick}>
-            {cell}
-          </td>;
+          var cell = (
+            <td className={className} onClick={onClick}>
+              {cell}
+            </td>
+          );
 
           return cell;
         }
 
-        return <td className={className} key={index}>
-          {cell}
-        </td>;
+        return (
+          <td className={className} key={index}>
+            {cell}
+          </td>
+        );
       });
     }
 
@@ -135,23 +143,27 @@ export var Grid = React.createClass({
       gridRow: true,
       gridHeader: row_index === -1,
       // we may sometimes/somday want different bg colors for even/odd rows
-      gridEven: row_index !== 0 && (row_index+1) % 2 === 0,
+      gridEven: row_index !== 0 && (row_index + 1) % 2 === 0,
       gridFirstRow: row_index === 0,
       gridRowOneItem: is_using_colspan,
       gridFadedOut: fadedOut,
       gridHighlighted: highlighted,
       gridHighlightable: highlightable,
-      noborder: !hasBorder,
+      noborder: !hasBorder
     });
 
     if (key) {
-        return <tr className={row_classes} onClick={onClick} key={key}>
-                 {cells}
-               </tr>;
+      return (
+        <tr className={row_classes} onClick={onClick} key={key}>
+          {cells}
+        </tr>
+      );
     }
-    return <tr className={row_classes} onClick={onClick}>
-             {cells}
-           </tr>;
+    return (
+      <tr className={row_classes} onClick={onClick}>
+        {cells}
+      </tr>
+    );
   },
 
   componentDidMount: function() {
@@ -166,34 +178,43 @@ export var Grid = React.createClass({
     var overflowNodes = ReactDOM.findDOMNode(this).getElementsByClassName('cellOverflow');
     _.each(overflowNodes, cell => {
       if (cell.scrollWidth > cell.clientWidth) {
-        cell.className += " cellOverflowPointer";
+        cell.className += ' cellOverflowPointer';
       }
     });
   },
 
   // verify that we were passed in good data
   verifyData: function() {
-    var data = this.props.data, headers = this.props.headers,
-      cellClasses = this.props.cellClasses, colnum = this.props.colnum;
+    var data = this.props.data,
+      headers = this.props.headers,
+      cellClasses = this.props.cellClasses,
+      colnum = this.props.colnum;
 
     if (!colnum) {
-      return <ProgrammingError>
-        {"`"}colnum{"`"} is 0 or unspecified!
-      </ProgrammingError>;
+      return (
+        <ProgrammingError>
+          {'`'}colnum{'`'} is 0 or unspecified!
+        </ProgrammingError>
+      );
     }
 
     // make sure headers/cellClasses have the right length
 
     if (!_.isEmpty(headers) && headers.length !== colnum) {
-      return <ProgrammingError>
-        {"`"}headers{"`"} has wrong length. Expected {colnum}, got {headers.length}.
-      </ProgrammingError>;
+      return (
+        <ProgrammingError>
+          {'`'}headers{'`'} has wrong length. Expected {colnum}, got {headers.length}.
+        </ProgrammingError>
+      );
     }
 
     if (!_.isEmpty(cellClasses) && cellClasses.length !== colnum) {
-      return <ProgrammingError>
-        {"`"}cellClasses{"`"} has wrong length. Expected {colnum}, got {cellClasses.length}.
-      </ProgrammingError>;
+      return (
+        <ProgrammingError>
+          {'`'}cellClasses{'`'} has wrong length. Expected {colnum}, got{' '}
+          {cellClasses.length}.
+        </ProgrammingError>
+      );
     }
 
     // verify everything in data is a row and same number of columns in all rows
@@ -204,7 +225,9 @@ export var Grid = React.createClass({
 
     _.each(data, row => {
       if (row instanceof GridRow) {
-        if (row.isUsingColspan) { return; }
+        if (row.isUsingColspan) {
+          return;
+        }
         row = row.getData();
       }
 
@@ -221,21 +244,25 @@ export var Grid = React.createClass({
 
     if (sample_bad_row) {
       console.log(sample_bad_row);
-      return <ProgrammingError>
-        Ran into something that wasn{"'"}t a valid row (also in console):
-        {sample_bad_row}.
-        {bad_rows_counter} of {data.length} row(s) seem broken.
-      </ProgrammingError>;
+      return (
+        <ProgrammingError>
+          Ran into something that wasn{"'"}t a valid row (also in console):
+          {sample_bad_row}.
+          {bad_rows_counter} of {data.length} row(s) seem broken.
+        </ProgrammingError>
+      );
     } else if (sample_bad_row_length) {
-      return <ProgrammingError>
-        Expected all rows to have length {colnum}, ran into a bad
-        row with length {sample_bad_row_length}.
-        {bad_rows_counter} of {data.length} row(s) seem broken.
-      </ProgrammingError>;
+      return (
+        <ProgrammingError>
+          Expected all rows to have length {colnum}, ran into a bad row with length{' '}
+          {sample_bad_row_length}.
+          {bad_rows_counter} of {data.length} row(s) seem broken.
+        </ProgrammingError>
+      );
     }
 
     return null;
-  },
+  }
 });
 
 /*
@@ -248,7 +275,14 @@ export var Grid = React.createClass({
  * you can pass null.
  */
 export class GridRow {
-  constructor(key, data, border=true, fadedOut=false, isHighlighted=false, rowOnClick=null) {
+  constructor(
+    key,
+    data,
+    border = true,
+    fadedOut = false,
+    isHighlighted = false,
+    rowOnClick = null
+  ) {
     if (!_.isArray(data)) {
       throw 'GridRow expects an array of data!';
     }
@@ -256,7 +290,7 @@ export class GridRow {
     this.border = border;
     this.fadedOut = fadedOut;
     this.highlighted = isHighlighted;
-    this.rowOnClick = rowOnClick
+    this.rowOnClick = rowOnClick;
     this.key = key;
   }
 
@@ -269,26 +303,36 @@ export class GridRow {
     return g;
   }
 
-  getData() { return this.data; }
-  getLength() { return this.data.length; }
-  hasBorder() { return this.border; }
-  isFadedOut() { return this.fadedOut; }
-  isHighlighted() { return this.highlighted; }
-  getRowOnClick() { return this.rowOnClick; }
+  getData() {
+    return this.data;
+  }
+  getLength() {
+    return this.data.length;
+  }
+  hasBorder() {
+    return this.border;
+  }
+  isFadedOut() {
+    return this.fadedOut;
+  }
+  isHighlighted() {
+    return this.highlighted;
+  }
+  getRowOnClick() {
+    return this.rowOnClick;
+  }
 
-  getKey() { return this.key; }
+  getKey() {
+    return this.key;
+  }
 
   // see oneItem constructor
-  isUsingColspan() { return this.useColspan; }
+  isUsingColspan() {
+    return this.useColspan;
+  }
 }
 
 Examples.add('Grid', __ => {
   var data = [['A', 1], ['Z', 26]];
-  return [
-    <Grid
-      colnum={2}
-      headers={['Letter', 'Position']}
-      data={data}
-    />
-  ];
+  return [<Grid colnum={2} headers={['Letter', 'Position']} data={data} />];
 });

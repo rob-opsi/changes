@@ -1,22 +1,25 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 import moment from 'moment';
+import URI from 'urijs';
 
-import ChangesLinks from 'es6!display/changes/links';
-import { ChangesPage, APINotLoadedPage } from 'es6!display/page_chrome';
-import { Error } from 'es6!display/errors';
-import { ManyBuildsStatus } from 'es6!display/changes/builds';
-import { TimeText } from 'es6!display/time';
-import { get_build_cause } from 'es6!display/changes/build_text';
-import { get_runnable_condition,
-         get_runnable_condition_short_text,
-         get_runnable_condition_color_cls } from 'es6!display/changes/build_conditions';
+import ChangesLinks from 'display/changes/links';
+import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
+import {Error} from 'display/errors';
+import {ManyBuildsStatus} from 'display/changes/builds';
+import {TimeText} from 'display/time';
+import {get_build_cause} from 'display/changes/build_text';
+import {
+  get_runnable_condition,
+  get_runnable_condition_short_text,
+  get_runnable_condition_color_cls
+} from 'display/changes/build_conditions';
 
-import Sidebar from 'es6!pages/builds_pages/sidebar';
-import { SingleBuild, LatestBuildsSummary } from 'es6!pages/builds_pages/build_info';
+import Sidebar from 'pages/builds_pages/sidebar';
+import {SingleBuild, LatestBuildsSummary} from 'pages/builds_pages/build_info';
 
-import * as api from 'es6!server/api';
+import * as api from 'server/api';
 
-import * as utils from 'es6!utils/utils';
+import * as utils from 'utils/utils';
 
 /*
  * The pages that show the results of builds run on a commit or diff. They're
@@ -27,10 +30,9 @@ import * as utils from 'es6!utils/utils';
 /**
  * Page that shows the builds associated with a single diff
  */
-export var DiffPage = React.createClass({
-
+export const DiffPage = React.createClass({
   propTypes: {
-    diff_id: PropTypes.string.isRequired,
+    diff_id: PropTypes.string.isRequired
   },
 
   getInitialTitle: function() {
@@ -39,8 +41,8 @@ export var DiffPage = React.createClass({
 
   getInitialState: function() {
     return {
-      diffBuilds: null,
-    }
+      diffBuilds: null
+    };
   },
 
   componentDidMount: function() {
@@ -66,33 +68,25 @@ export var DiffPage = React.createClass({
     diff_data['revision_id'] = diff_data['revision_id'] || this.props.diff_id.substr(1);
     diff_data['dateCreated'] = diff_data['dateCreated'] || 0; // unix timestamp
 
-    var builds = _.chain(diff_data.changes)
-      .pluck('builds')
-      .flatten()
-      .value();
+    var builds = _.chain(diff_data.changes).pluck('builds').flatten().value();
 
-    return <BuildsPage
-      type="diff"
-      targetData={diff_data}
-      builds={builds}
-    />;
+    return <BuildsPage type="diff" targetData={diff_data} builds={builds} />;
   }
 });
 
 /**
  * Page that shows the builds associated with a single commit
  */
-export var CommitPage = React.createClass({
-
+export const CommitPage = React.createClass({
   propTypes: {
-    sourceUUID: PropTypes.string.isRequired,
+    sourceUUID: PropTypes.string.isRequired
   },
 
   getInitialState: function() {
     return {
       commitBuilds: null,
-      source: null,
-    }
+      source: null
+    };
   },
 
   componentDidMount: function() {
@@ -104,31 +98,32 @@ export var CommitPage = React.createClass({
     // as a quick workaround.
     let commit_builds = [];
 
-    let fetch_one_page_of_builds = (endpoint) => {
+    let fetch_one_page_of_builds = endpoint => {
       api.make_api_ajax_get(
-          endpoint,
-          null,
-          response => {
-              let api_response = api.APIResponse(endpoint);
-              api_response.response = response;
-              let new_items = api_response.getReturnedData();
-              commit_builds = commit_builds.concat(new_items);
+        endpoint,
+        null,
+        response => {
+          let api_response = api.APIResponse(endpoint);
+          api_response.response = response;
+          let new_items = api_response.getReturnedData();
+          commit_builds = commit_builds.concat(new_items);
 
-              let new_endpoint = api_response.getLinksFromHeader();
-              if ('next' in new_endpoint) {
-                  fetch_one_page_of_builds(new_endpoint.next);
-              } else {
-                  this.setState({'commitBuilds': commit_builds});
-              }
-          },
-          error => {
-              console.log(`Error fetching builds. (${endpoint})`);
-          });
+          let new_endpoint = api_response.getLinksFromHeader();
+          if ('next' in new_endpoint) {
+            fetch_one_page_of_builds(new_endpoint.next);
+          } else {
+            this.setState({commitBuilds: commit_builds});
+          }
+        },
+        error => {
+          console.log(`Error fetching builds. (${endpoint})`);
+        }
+      );
     };
 
     // 100 is max page size.
     let endpoint = `/api/0/sources_builds/?source_id=${uuid}&per_page=100`;
-    fetch_one_page_of_builds(endpoint);  
+    fetch_one_page_of_builds(endpoint);
     api.fetch(this, {
       source: `/api/0/sources/${uuid}`
     });
@@ -144,50 +139,55 @@ export var CommitPage = React.createClass({
       var links = _.map(this.state.commitBuilds.getReturnedData(), b => {
         var href = URI(`/single_build/${b.id}/`);
         var condition = get_runnable_condition(b);
-        return <div>
-          <TimeText time={b.dateFinished || b.dateStarted || b.dateCreated} />
-          {": "}
-          <a href={href}>{b.project.name}</a>
-          {" ("}
-          <span className={get_runnable_condition_color_cls(condition)}>
-            {get_runnable_condition_short_text(condition)}
-          </span>
-          {")"}
-        </div>
+        return (
+          <div>
+            <TimeText time={b.dateFinished || b.dateStarted || b.dateCreated} />
+            {': '}
+            <a href={href}>
+              {b.project.name}
+            </a>
+            {' ('}
+            <span className={get_runnable_condition_color_cls(condition)}>
+              {get_runnable_condition_short_text(condition)}
+            </span>
+            {')'}
+          </div>
+        );
       });
 
-      return <ChangesPage>
-        <p>
-          We couldn{"'"}t load this commit. Oftentimes this is because it
-          contains unicode characters, which we don{"'"}t properly support. Rest
-          assured that we feel both regret and self-loathing about this.
-        </p>
+      return (
+        <ChangesPage>
+          <p>
+            We couldn{"'"}t load this commit. Oftentimes this is because it contains
+            unicode characters, which we don{"'"}t properly support. Rest assured that we
+            feel both regret and self-loathing about this.
+          </p>
 
-        <p>
-          Here are links to the individual builds. Hopefully you{"'"}ll have a
-          better chance loading those pages:
-        </p>
-        <div className="marginTopL">
-          {links}
-        </div>
-      </ChangesPage>;
+          <p>
+            Here are links to the individual builds. Hopefully you{"'"}ll have a better
+            chance loading those pages:
+          </p>
+          <div className="marginTopL">
+            {links}
+          </div>
+        </ChangesPage>
+      );
     }
 
     if (this.state.commitBuilds === null || !api.allLoaded([this.state.source])) {
-      return <APINotLoadedPage
-        calls={[this.state.commitBuilds, this.state.source]}
-      />;
+      return <APINotLoadedPage calls={[this.state.commitBuilds, this.state.source]} />;
     }
 
     var sha = this.state.source.getReturnedData().revision.sha;
     utils.setPageTitle(`${sha.substr(0, 7)}: Builds`);
 
-
-    return <BuildsPage
-      type="commit"
-      targetData={this.state.source.getReturnedData()}
-      builds={this.state.commitBuilds}
-    />;
+    return (
+      <BuildsPage
+        type="commit"
+        targetData={this.state.source.getReturnedData()}
+        builds={this.state.commitBuilds}
+      />
+    );
   }
 });
 
@@ -197,8 +197,7 @@ export var CommitPage = React.createClass({
  * The internal page shared by CommitPage and DiffPage (since the logic is
  * basically the same)
  */
-var BuildsPage = React.createClass({
-
+export default React.createClass({
   propTypes: {
     // are we rendering for a diff or a commit
     type: PropTypes.oneOf(['diff', 'commit']).isRequired,
@@ -206,7 +205,7 @@ var BuildsPage = React.createClass({
     targetData: PropTypes.object,
     // the builds associated with this diff/commit. They may be more sparse
     // than a call to build_details...we use this to populate the sidebar
-    builds: PropTypes.array.isRequired,
+    builds: PropTypes.array.isRequired
   },
 
   getInitialState: function() {
@@ -214,36 +213,34 @@ var BuildsPage = React.createClass({
 
     return {
       activeBuildID: query_params.buildID,
-      tests: {}, // fetched on demand
-    }
+      tests: {} // fetched on demand
+    };
   },
 
   render: function() {
     this.updateWindowUrl();
 
     // TODO: cleanup!
-    return <ChangesPage
-      bodyPadding={false}
-      fixed={true}>
-
-      <div className="buildsLabelHeader fixedClass">
-        {this.renderLabelHeader()}
-      </div>
-      <Sidebar
-        builds={this.props.builds}
-        type={this.props.type}
-        targetData={this.props.targetData}
-        activeBuildID={this.state.activeBuildID}
-        pageElem={this}
-      />
-      <div className="buildsContent changeMarginAdminMsg">
-        <div className="buildsInnerContent">
-          {this.getErrorMessage()}
-          {this.getContent()}
+    return (
+      <ChangesPage bodyPadding={false} fixed={true}>
+        <div className="buildsLabelHeader fixedClass">
+          {this.renderLabelHeader()}
         </div>
-      </div>
-
-    </ChangesPage>;
+        <Sidebar
+          builds={this.props.builds}
+          type={this.props.type}
+          targetData={this.props.targetData}
+          activeBuildID={this.state.activeBuildID}
+          pageElem={this}
+        />
+        <div className="buildsContent changeMarginAdminMsg">
+          <div className="buildsInnerContent">
+            {this.getErrorMessage()}
+            {this.getContent()}
+          </div>
+        </div>
+      </ChangesPage>
+    );
   },
 
   updateWindowUrl: function() {
@@ -263,10 +260,12 @@ var BuildsPage = React.createClass({
   getErrorMessage: function() {
     if (this.props.type === 'diff') {
       var diff_data = this.props.targetData;
-      if (!diff_data["fetched_data_from_phabricator"]) {
-        return <Error className="marginBottomM">
-          Unable to get diff data from Phabricator!
-        </Error>;
+      if (!diff_data['fetched_data_from_phabricator']) {
+        return (
+          <Error className="marginBottomM">
+            Unable to get diff data from Phabricator!
+          </Error>
+        );
       }
     }
     return null;
@@ -280,10 +279,7 @@ var BuildsPage = React.createClass({
       if (build) {
         // use a key so that we remount when switching builds
         return React.addons.createFragment({
-          [ build[0].id ]:
-            <SingleBuild
-              build={build[0]}
-            />
+          [build[0].id]: <SingleBuild build={build[0]} />
         });
       }
     }
@@ -292,31 +288,27 @@ var BuildsPage = React.createClass({
     var latest_builds = builds;
 
     if (this.props.type === 'diff') {
-      var builds_by_diff_id = _.groupBy(
-        builds,
-        b => b.source.data['phabricator.diffID']);
+      var builds_by_diff_id = _.groupBy(builds, b => b.source.data['phabricator.diffID']);
 
-      var latest_diff_id = _.chain(builds_by_diff_id)
-        .keys()
-        .sortBy()
-        .last()
-        .value();
+      var latest_diff_id = _.chain(builds_by_diff_id).keys().sortBy().last().value();
 
       latest_builds = builds_by_diff_id[latest_diff_id];
     }
 
-    return <LatestBuildsSummary
-      builds={latest_builds}
-      type={this.props.type}
-      targetData={this.props.targetData}
-      pageElem={this}
-    />;
+    return (
+      <LatestBuildsSummary
+        builds={latest_builds}
+        type={this.props.type}
+        targetData={this.props.targetData}
+        pageElem={this}
+      />
+    );
   },
 
   renderLabelHeader: function() {
     var type = this.props.type;
 
-    var header = "No header yet";
+    var header = 'No header yet';
     if (type === 'commit') {
       var source = this.props.targetData;
       var authorLink = ChangesLinks.author(source.revision.author);
@@ -324,58 +316,69 @@ var BuildsPage = React.createClass({
 
       var parentElem = null;
       if (source.revision.parents && source.revision.parents.length > 0) {
-        parentElem = <ParentCommit
-          sha={source.revision.parents[0]}
-          repoID={source.revision.repository.id}
-          label={source.revision.parents.length <= 1 ? 'only' : 'first'}
-        />;
+        parentElem = (
+          <ParentCommit
+            sha={source.revision.parents[0]}
+            repoID={source.revision.repository.id}
+            label={source.revision.parents.length <= 1 ? 'only' : 'first'}
+          />
+        );
       }
 
-      header = <div>
-        <div className="floatR">
-          <TimeText time={source.revision.dateCreated} />
+      header = (
+        <div>
+          <div className="floatR">
+            <TimeText time={source.revision.dateCreated} />
+          </div>
+          <a className="subtle lb" href={commitLink} target="_blank">
+            {source.revision.sha.substring(0, 7)}
+          </a>
+          {': '}
+          {utils.truncate(utils.first_line(source.revision.message))}
+          <div className="headerByline">
+            {'by '}
+            {authorLink}
+            {parentElem}
+          </div>
         </div>
-        <a className="subtle lb" href={commitLink} target="_blank">
-          {source.revision.sha.substring(0,7)}
-        </a>
-        {": "}
-        {utils.truncate(utils.first_line(source.revision.message))}
-        <div className="headerByline">
-          {"by "}
-          {authorLink}
-          {parentElem}
-        </div>
-      </div>;
+      );
     } else if (type === 'diff') {
       var diffData = this.props.targetData;
       var authorLink = ChangesLinks.author(
-        this.getAuthorForDiff(this.props.builds), true);
+        this.getAuthorForDiff(this.props.builds),
+        true
+      );
 
       var parentElem = null;
       var diffSource = this.getSourceForDiff(this.props.builds);
-      if (diffSource) {  // maybe this is missing if we have no builds?
-        parentElem = <ParentCommit
-          sha={diffSource.revision.sha}
-          repoID={diffSource.revision.repository.id}
-          label="diffParent"
-        />;
+      if (diffSource) {
+        // maybe this is missing if we have no builds?
+        parentElem = (
+          <ParentCommit
+            sha={diffSource.revision.sha}
+            repoID={diffSource.revision.repository.id}
+            label="diffParent"
+          />
+        );
       }
 
-      header = <div>
-        <div className="floatR">
-          <TimeText time={moment.unix(diffData.dateCreated).toString()} />
+      header = (
+        <div>
+          <div className="floatR">
+            <TimeText time={moment.unix(diffData.dateCreated).toString()} />
+          </div>
+          <a className="subtle lb" href={diffData.uri} target="_blank">
+            D{diffData.id}
+          </a>
+          {': '}
+          {utils.truncate(diffData.title)}
+          <div className="headerByline">
+            {'by '}
+            {authorLink}
+            {parentElem}
+          </div>
         </div>
-        <a className="subtle lb" href={diffData.uri} target="_blank">
-          D{diffData.id}
-        </a>
-        {": "}
-        {utils.truncate(diffData.title)}
-        <div className="headerByline">
-          {"by "}
-          {authorLink}
-          {parentElem}
-        </div>
-      </div>;
+      );
     } else {
       throw 'unreachable';
     }
@@ -400,10 +403,9 @@ var BuildsPage = React.createClass({
   }
 });
 
-export var SingleBuildPage = React.createClass({
-
+export const SingleBuildPage = React.createClass({
   propTypes: {
-    buildID: PropTypes.string.isRequired,
+    buildID: PropTypes.string.isRequired
   },
 
   getInitialState: function() {
@@ -426,22 +428,23 @@ export var SingleBuildPage = React.createClass({
 
     utils.setPageTitle(`A ${build.project.name} Build`);
 
-    return <ChangesPage>
-      <SingleBuild build={build} />
-    </ChangesPage>;
-  },
+    return (
+      <ChangesPage>
+        <SingleBuild build={build} />
+      </ChangesPage>
+    );
+  }
 });
 
-var ParentCommit = React.createClass({
-
+export const ParentCommit = React.createClass({
   propTypes: {
     sha: PropTypes.string.isRequired,
     repoID: PropTypes.string.isRequired,
-    label: PropTypes.oneOf(['only', 'first', 'diffParent']).isRequired,
+    label: PropTypes.oneOf(['only', 'first', 'diffParent']).isRequired
   },
 
   getInitialState() {
-    return { builds: null };
+    return {builds: null};
   },
 
   componentDidMount() {
@@ -450,7 +453,7 @@ var ParentCommit = React.createClass({
 
     api.fetch(this, {
       builds: URI('/api/0/sources_builds/')
-        .addQuery({ revision_sha: sha, repo_id: repoID, tag: "commit" })
+        .addQuery({revision_sha: sha, repo_id: repoID, tag: 'commit'})
         .toString()
     });
   },
@@ -473,19 +476,27 @@ var ParentCommit = React.createClass({
     let shortSha = sha.substr(0, 7);
     let shaMarkup = null;
     if (builds.length > 0) {
-      shaMarkup = <span>
-        <a className="marginLeftXS" href={ChangesLinks.buildsHref(builds)}>
-        {shortSha}
-        </a>
-        <ManyBuildsStatus builds={builds} />
-        </span>;
+      shaMarkup = (
+        <span>
+          <a className="marginLeftXS" href={ChangesLinks.buildsHref(builds)}>
+            {shortSha}
+          </a>
+          <ManyBuildsStatus builds={builds} />
+        </span>
+      );
     } else {
-      shaMarkup = <span className="marginLeftXS">{shortSha}</span>;
+      shaMarkup = (
+        <span className="marginLeftXS">
+          {shortSha}
+        </span>
+      );
     }
-    return <span className="parentLabel marginLeftS">
-      &middot;
-      <span className="marginLeftS">{label}</span>
-      {shaMarkup}
-      </span>;
+    return (
+      <span className="parentLabel marginLeftS">
+        &middot;
+        <span className="marginLeftS">{label}</span>
+        {shaMarkup}
+      </span>
+    );
   }
 });

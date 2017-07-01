@@ -1,9 +1,9 @@
-import React, { PropTypes } from 'react';
+import React, {PropTypes} from 'react';
 import moment from 'moment';
 
-import Examples from 'es6!display/examples';
+import Examples from 'display/examples';
 
-import * as utils from 'es6!utils/utils';
+import * as utils from 'utils/utils';
 
 /*
  * Contains a bunch of components for dealing with time. We also use the
@@ -25,8 +25,7 @@ import * as utils from 'es6!utils/utils';
  *  TODO: add 24 hour format support
  *  TODO: title with exact time? in UTC?
  */
-export var TimeText = React.createClass({
-
+export const TimeText = React.createClass({
   propTypes: {
     // The time to show. If not ISO 8601, will do the same as new Date()
     time: PropTypes.string.isRequired,
@@ -34,7 +33,7 @@ export var TimeText = React.createClass({
     // needed (format='X', see http://momentjs.com/docs/#/parsing/string-format/)
     format: PropTypes.string,
 
-    className: PropTypes.string,
+    className: PropTypes.string
 
     // ...
     // transfers other properties to rendered <span />
@@ -42,23 +41,24 @@ export var TimeText = React.createClass({
 
   getDefaultProps: function() {
     return {
-      'format': ''
-    }
+      format: ''
+    };
   },
 
   getInitialState: function() {
-    return { raw: false };
+    return {raw: false};
   },
 
   render: function() {
-    var { time, format, className, ...others } = this.props;
+    var {time, format, className, ...others} = this.props;
 
     if (!time) {
-      return <span {...others}></span>;
+      return <span {...others} />;
     }
 
     var time_text = '';
-    var classes = '', title = '';
+    var classes = '',
+      title = '';
     if (!this.state.raw) {
       classes += 'timeTextExpandable';
       title = 'Click to view full timestamp';
@@ -80,41 +80,40 @@ export var TimeText = React.createClass({
         time_text = time.format('MMM D, YYYY');
       }
     } else {
-      var DATE_RFC2822 = "ddd, DD MMM YYYY HH:mm:ss ZZ";
+      var DATE_RFC2822 = 'ddd, DD MMM YYYY HH:mm:ss ZZ';
 
-      time_text = <span>
-        <span className="lb">Local:</span>{" "}
-          {moment.utc(time, format).local().format(DATE_RFC2822)}<br />
-        <span className="lb">UTC:</span>{" "}
-          {moment.utc(time, format).format(DATE_RFC2822)}
-      </span>;
+      time_text = (
+        <span>
+          <span className="lb">Local:</span>{' '}
+          {moment.utc(time, format).local().format(DATE_RFC2822)}
+          <br />
+          <span className="lb">UTC:</span> {moment.utc(time, format).format(DATE_RFC2822)}
+        </span>
+      );
     }
 
     var onClick = evt => {
       // Don't allow clicks on <TimeText> to cascade through to other
       // actions/elements.
       evt.stopPropagation();
-      this.setState({ raw: true });
+      this.setState({raw: true});
     };
 
-    classes = classes + " " + (className || "");
+    classes = classes + ' ' + (className || '');
 
-    return <span
-      onClick={onClick}
-      className={classes}
-      title={title}
-      {...others}>
-      {time_text}
-    </span>;
+    return (
+      <span onClick={onClick} className={classes} title={title} {...others}>
+        {time_text}
+      </span>
+    );
   }
 });
 
 // given a unix timestamp, renders how long its been since then in hh:mm:ss
 // format. Useful to render how long its been since a build started
-export var LiveTime = React.createClass({
-
+export const LiveTime = React.createClass({
   propTypes: {
-    time: PropTypes.number,
+    time: PropTypes.number
   },
 
   getInitialState: function() {
@@ -144,7 +143,11 @@ export var LiveTime = React.createClass({
     } else {
       text = minutes + suffix;
     }
-    return <span>{text}</span>;
+    return (
+      <span>
+        {text}
+      </span>
+    );
   },
 
   // timer code
@@ -171,8 +174,8 @@ export var LiveTime = React.createClass({
             });
           }
         });
-      // this isn't going to be that smooth :/, but do I really want to change
-      // it to something like 250ms?
+        // this isn't going to be that smooth :/, but do I really want to change
+        // it to something like 250ms?
       }, 1000);
     }
   },
@@ -189,29 +192,32 @@ export var LiveTime = React.createClass({
   }
 });
 
-export var formatTime = function(time) {
-  var DATE_RFC2822 = "ddd, DD MMM YYYY HH:mm:ss ZZ";
+export const formatTime = function(time) {
+  var DATE_RFC2822 = 'ddd, DD MMM YYYY HH:mm:ss ZZ';
   return moment.utc(time).local().format(DATE_RFC2822);
-}
+};
 
 /*
  * Converts 136 [in seconds] to a string like "2m16s". Note that the backend
  * often returns durations in milliseconds, not seconds!
  */
-export var display_duration = function(total_seconds) {
-  return _.filter(display_duration_pieces(total_seconds), p => p !== null).join(" ");
-}
+export const display_duration = function(total_seconds) {
+  return _.filter(display_duration_pieces(total_seconds), p => p !== null).join(' ');
+};
 
 /*
  * as display_duration, but returns a 4-tuple of durations. Useful if you
  * want to emphasize hour/day
  */
-export var display_duration_pieces = function(total_seconds) {
+export const display_duration_pieces = function(total_seconds) {
   if (total_seconds < 1) {
-    return [null, null, null, "<1s"];
+    return [null, null, null, '<1s'];
   }
 
-  var seconds = 0, minutes = 0, hours = 0, days = 0;
+  var seconds = 0,
+    minutes = 0,
+    hours = 0,
+    days = 0;
   minutes = Math.floor(total_seconds / 60);
   seconds = Math.floor(total_seconds % 60);
 
@@ -226,19 +232,16 @@ export var display_duration_pieces = function(total_seconds) {
   }
 
   return [
-    (days ? `${days}d` : null),
-    (hours ? `${hours}h` : null),
-    (minutes ? `${utils.pad(minutes)}m` : null),
+    days ? `${days}d` : null,
+    hours ? `${hours}h` : null,
+    minutes ? `${utils.pad(minutes)}m` : null,
     `${minutes ? utils.pad(seconds, 2) : seconds}s`
   ];
-}
+};
 
 Examples.add('TimeText and display_duration', __ => {
   return [
-    <TimeText
-      className="block paddingBottomS"
-      time={moment.utc().local().toString()}
-    />,
+    <TimeText className="block paddingBottomS" time={moment.utc().local().toString()} />,
     <TimeText className="block" time="September 1, 2008 3:14 PM" />,
     display_duration(57),
     display_duration(3742),
