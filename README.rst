@@ -18,6 +18,7 @@ mkvirtualenv changes
 make develop
 createdb -E utf-8 changes
 make upgrade
+mkdir -p ~/.changes/repos
 ```
 
 Create the configuration file at `~/.changes/changes.conf.py`
@@ -28,7 +29,7 @@ WEB_BASE_URI = 'http://localhost:5000'
 INTERNAL_BASE_URI = 'http://localhost:5000'
 SERVER_NAME = 'localhost:5000'
 
-REPO_ROOT = '/tmp'
+REPO_ROOT = '~/.changes/repos'
 
 # You can obtain these values via the Google Developers Console:
 # https://console.developers.google.com/
@@ -43,6 +44,7 @@ Create a repository to get things going:
 
 ```shell
 bin/repos add --url git@github.com:getsentry/changes.git --backend git
+bin/projects add --label changes --repo-url git@github.com:getsentry/changes.git --slug changes
 ```
 
 Load the development server:
