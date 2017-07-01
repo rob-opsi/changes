@@ -131,7 +131,7 @@ elif args.command == 'edit':
         repo.status = RepositoryStatus.active
 
     db.session.add(repo)
-    import_repo(
+    import_repo.delay(
         repo_id=repo.id.hex,
         task_id=repo.id.hex,
     )
@@ -146,11 +146,11 @@ elif args.command == 'list':
 
 elif args.command == 'import':
     repo = get_repo(args.id)
-    import_repo(
+    import_repo.delay(
         repo_id=repo.id.hex,
         task_id=repo.id.hex,
     )
-    print("Saved repo with ID {%s}" % (
+    print("Imported repo with ID {%s}" % (
         repo.id,
     ))
 
