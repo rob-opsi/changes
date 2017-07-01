@@ -8,7 +8,7 @@
         "htmlcov": true,
         "build": true,
         "*.log": true,
-        "*.egg-info": true,
+        "*.egg-info": true
     },
     "files.trimTrailingWhitespace": true,
 
