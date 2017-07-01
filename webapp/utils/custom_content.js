@@ -5,7 +5,7 @@
  * (we've added a bunch for ourselves already), and follow the instructions at
  * the bottom to create your own custom content.
  */
-import _ from 'underscore';
+import _ from 'lodash';
 
 // default_content: what to return if no custom content was provided for name
 // extra_data: if the custom content is a function, it will be called with

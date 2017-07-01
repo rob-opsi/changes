@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react';
 import moment from 'moment';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import APINotLoaded from 'display/not_loaded';
 import ChangesLinks from 'display/changes/links';
@@ -89,7 +89,7 @@ export const SingleBuild = React.createClass({
     // get job phases
     var job_ids = _.map(build_prop.jobs, j => j.id);
 
-    let phasesCalls = _.chain(this.state.jobPhases).pick(job_ids).values().value();
+    let phasesCalls = _.flow(_.pick(job_ids), _.values)(this.state.jobPhases);
 
     let calls = phasesCalls.concat([
       this.state.buildDetails,
@@ -103,7 +103,7 @@ export const SingleBuild = React.createClass({
     var build = this.state.buildDetails.getReturnedData();
 
     var coverageInfo = this.state.buildCoverage.getReturnedData();
-    var job_phases = _.mapObject(this.state.jobPhases, (v, k) => {
+    var job_phases = Object.values(this.state.jobPhases).map(v => {
       return v.getReturnedData();
     });
 
@@ -754,10 +754,10 @@ export const SingleBuild = React.createClass({
           });
           return maxPri;
         };
-        let logSources = _.chain(jobstep.logSources)
-          .sortBy(ls => [logSourceMaxPriority(ls) || 0, ls.name])
-          .reverse()
-          .value();
+        let logSources = _.flow(
+          _.sortBy(ls => [logSourceMaxPriority(ls) || 0, ls.name]),
+          _.reverse
+        )(jobstep.logSources);
 
         var links = [];
         logSources.forEach(l => {
@@ -903,13 +903,13 @@ export const LatestBuildsSummary = React.createClass({
     // a common helper function
 
     // we want the most recent build for each project
-    var latestByProj = _.chain(builds)
-      .groupBy(b => b.project.name)
-      .map(proj_builds => _.last(_.sortBy(proj_builds, b => b.dateCreated)))
-      .values()
-      .value();
+    var latestByProj = _.flow(
+      _.groupBy(b => b.project.name),
+      _.map(proj_builds => _.last(_.sortBy(proj_builds, b => b.dateCreated))),
+      _.values
+    )(builds);
 
-    builds = _.map(latestByProj, (b, index) => {
+    builds = latestByProj.map((b, index) => {
       return (
         <div className="marginTopL paddingTopL fainterBorderTop">
           <SingleBuild build={b} content="short" />

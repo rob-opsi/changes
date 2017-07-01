@@ -1,7 +1,7 @@
 import React from 'react';
 import moment from 'moment';
 import URI from 'urijs';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import SimpleTooltip from 'display/simple_tooltip';
 

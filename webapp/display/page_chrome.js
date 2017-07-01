@@ -1,8 +1,9 @@
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
-import moment from 'moment';
-import _ from 'underscore';
+import {Link} from 'react-router';
+import _ from 'lodash';
 
+import config from 'common/config';
 import APINotLoaded from 'display/not_loaded';
 import SectionHeader from 'display/section_header';
 import SimpleTooltip from 'display/simple_tooltip';
@@ -224,12 +225,12 @@ var ChangesPageHeader = React.createClass({
     return (
       <div>
         <div className={classes}>
-          <a className={my_changes_classes} href="/">
+          <Link className={my_changes_classes} to="/">
             My Changes
-          </a>
-          <a className={all_projects_classes} href="/projects/">
+          </Link>
+          <Link className={all_projects_classes} to="/projects">
             Projects
-          </a>
+          </Link>
           <ChangesLogin />
           {this.props.widget ? <ChangesInlinePerf /> : null}
           {learnMore}
@@ -254,7 +255,7 @@ var ChangesPageHeader = React.createClass({
 
     var expandedContent = null;
     if (this.state.helpExpanded) {
-      var linkMarkup = _.map(learnMoreLinks, (link, index) => {
+      var linkMarkup = learnMoreLinks.map((link, index) => {
         var className = index > 0 ? 'marginTopL' : '';
         return (
           <div className={className}>
@@ -422,13 +423,13 @@ var ChangesInlinePerf = React.createClass({
 
     var fmt_time = t => Math.round(t) + 'ms';
 
-    var api_entries = _.chain(window.performance.getEntries())
+    var api_entries = window.performance
+      .getEntries()
       .filter(e => e.name.indexOf('api/0/') !== -1)
-      .sortBy(e => e.startTime)
-      .value();
+      .sort((a, b) => a.startTime - b.startTime);
 
     var data = [];
-    _.each(api_entries, e => {
+    api_entries.forEach(e => {
       // just grab the api portion of the url
       var api_name_start = e.name.indexOf('api/0/') + 'api/0/'.length;
       var api_name = e.name.substr(api_name_start);
@@ -466,7 +467,7 @@ var ChangesInlinePerf = React.createClass({
     });
 
     // Also add in built.js
-    _.each(window.performance.getEntries(), e => {
+    window.performance.getEntries().forEach(e => {
       if (e.name.indexOf('built.js') > 0) {
         data.push([
           <em>Compiled JS</em>,
@@ -521,7 +522,7 @@ var ChangesLogin = React.createClass({
   // no properties
 
   render: function() {
-    if (!window.changesAuthData || !window.changesAuthData.user) {
+    if (!config.get('auth')) {
       var current_location = encodeURIComponent(window.location.href);
       var login_href = '/auth/login/?orig_url=' + current_location;
 
@@ -532,9 +533,9 @@ var ChangesLogin = React.createClass({
       );
     } else {
       var admin_link = (
-        <a className="headerLinkBlock" href="/admin" title="Admin">
+        <Link className="headerLinkBlock" to="/admin" title="Admin">
           <i className="fa fa-cog" />
-        </a>
+        </Link>
       );
       return (
         <div className="floatR">

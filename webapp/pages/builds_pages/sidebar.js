@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react';
 import moment from 'moment';
 import URI from 'urijs';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import ChangesLinks from 'display/changes/links';
 import {TimeText, display_duration} from 'display/time';
@@ -117,7 +117,7 @@ var Sidebar = React.createClass({
 
     var sections = [];
     var hasRenderedSectionWithBuilds = false;
-    _.each(all_diff_ids, (single_diff_id, index) => {
+    all_diff_ids.forEach((single_diff_id, index) => {
       var diff_builds = builds_by_update[single_diff_id];
       var changes_data = diff_data.changes[single_diff_id];
 
@@ -184,11 +184,11 @@ var Sidebar = React.createClass({
     builds = buildsForLastCodeChange(builds);
 
     // we want the most recent build for each project
-    return _.chain(builds)
-      .groupBy(b => b.project.name)
-      .map(projBuilds => _.last(_.sortBy(projBuilds, b => b.dateCreated)))
-      .values()
-      .value();
+    return _.flow(
+      _.groupBy(b => b.project.name),
+      _.map(projBuilds => _.last(_.sortBy(projBuilds, b => b.dateCreated))),
+      _.values()
+    )(builds);
   },
 
   renderLatestItem: function(builds) {
@@ -219,7 +219,7 @@ var Sidebar = React.createClass({
     if (builds === undefined) {
       return null;
     }
-    builds = _.chain(builds).sortBy(b => b.dateCreated).reverse().value();
+    builds = _.flow(_.sortBy(b => b.dateCreated), _.reverse())(builds);
 
     var latestPerProj = this.getLatestPerProject(builds);
     var shouldDim = build => {
@@ -238,7 +238,7 @@ var Sidebar = React.createClass({
       };
     };
 
-    var entries = _.map(builds, b => {
+    var entries = builds.map(b => {
       var buildCondition = get_runnable_condition(b);
       var subtextExtraClass =
         buildCondition.indexOf('failed') === 0 ? 'redGrayMix' : null;

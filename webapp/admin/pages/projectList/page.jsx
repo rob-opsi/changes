@@ -1,7 +1,6 @@
 import React, {PropTypes} from 'react';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
 import URI from 'urijs';
-import _ from 'underscore';
 
 import SectionHeader from 'display/section_header';
 import {Button} from 'display/button';
@@ -18,7 +17,7 @@ import * as api from 'server/api';
 
 import * as utils from 'utils/utils';
 
-let AdminProjectPage = React.createClass({
+export default React.createClass({
   menuItems: ['Settings', 'Snapshots', 'Build Plans', 'New Build Plan'],
 
   getInitialState: function() {
@@ -380,7 +379,7 @@ let ProjectSettingsFieldGroup = React.createClass({
         'Failed to save project'
       )
     ];
-    formMessages = _.filter(formMessages, m => m && m.props.message); // removes objs without a message prop
+    formMessages = formMessages.filter(m => m && m.props.message); // removes objs without a message prop
     return FieldGroupMarkup.create(form, 'Save Project', this, formMessages);
   }
 });
@@ -396,7 +395,7 @@ let SnapshotList = React.createClass({
   },
 
   render: function() {
-    let rows = _.map(this.props.snapshots, snapshot => {
+    let rows = this.props.snapshots.map(snapshot => {
       let sha = '-';
       if (snapshot.source.revision.sha) {
         sha = snapshot.source.revision.sha.substring(0, 12);
@@ -480,7 +479,7 @@ let PlanList = React.createClass({
     let selectedPlan = this.state.selectedPlan;
 
     let plans = this.state.plans.getReturnedData();
-    _.each(plans, plan => {
+    plans.forEach(plan => {
       let isSelected = selectedPlan === plan;
       let onClick = __ => {
         let newValue = isSelected ? null : plan;
@@ -502,7 +501,7 @@ let PlanList = React.createClass({
     let planDetails = null;
     if (selectedPlan) {
       let data = null;
-      data = _.find(plans, plan => selectedPlan.id === plan.id);
+      data = plans.find(plan => selectedPlan.id === plan.id);
       planDetails = (
         <PlanDetailsWrapper
           className="indent"
@@ -699,7 +698,7 @@ let PlanDetails = React.createClass({
         'Failed to save plan'
       )
     ];
-    formMessages = _.filter(formMessages, m => m && m.props.message); // removes objs without a message prop
+    formMessages = formMessages.filter(m => m && m.props.message); // removes objs without a message prop
     let fieldMarkup = FieldGroupMarkup.create(form, 'Save Plan', this, formMessages);
 
     let stepMarkup = null;
@@ -839,7 +838,7 @@ let StepDetails = React.createClass({
         <Button className="marginLeftS">Delete Step</Button>
       </Request>
     );
-    formMessages = _.filter(formMessages, m => m && m.props.message); // removes objs without a message prop
+    formMessages = formMessages.filter(m => m && m.props.message); // removes objs without a message prop
     return FieldGroupMarkup.create(form, 'Save Step', this, formMessages, [del]);
   }
 });
@@ -901,5 +900,3 @@ let NewPlan = React.createClass({
     return FieldGroupMarkup.create(form, 'Create Plan', this, []);
   }
 });
-
-export default AdminProjectPage;

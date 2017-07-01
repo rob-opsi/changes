@@ -4,7 +4,7 @@
  *
  * Some more changes-specific stuff is in display/changes/utils.py
  */
-import _ from 'underscore';
+import _ from 'lodash';
 
 //
 // Generic stuff
@@ -134,17 +134,10 @@ export const update_state_dict = function(map_key, updates) {
   return (prev_state, current_props) => {
     var prev_obj = prev_state[map_key] || {};
     var old_map = _.create(Object.getPrototypeOf(prev_obj), {});
-    old_map = _.extendOwn(old_map, prev_obj, updates);
     return {
-      [map_key]: old_map
+      [map_key]: _.assign(old_map, prev_obj, updates)
     };
   };
-};
-
-export const to_underscore = function(camelcase) {
-  return this.replace(/([A-Z])/g, function($1) {
-    return '_' + $1.toLowerCase();
-  });
 };
 
 export const setPageTitle = function(title) {

@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import ChangesLinks from 'display/changes/links';
 import SimpleTooltip from 'display/simple_tooltip';
@@ -31,16 +31,9 @@ export const ChangesChart = React.createClass({
     var {runnables, className} = this.props;
 
     // we'll render bar heights relative to this
-    // We sortBy(identity) because using sort() sorts by string representation, which is wrong.
-    let longestDuration = _.chain(runnables)
-      .compact()
-      .pluck('duration')
-      .compact()
-      .sortBy(_.identity)
-      .last()
-      .value();
+    let longestDuration = Math.max(...runnables.map(x => x.duration || 0));
 
-    var content = _.map(this.props.runnables, (runnable, idx) => {
+    var content = this.props.runnables.map((runnable, idx) => {
       var no_duration = runnable && !runnable.duration && runnable.duration === 0;
       if (_.isEmpty(runnable) || no_duration) {
         // would be nice to still show a tooltip here...

@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
-import _ from 'underscore';
+import {Link} from 'react-router';
+import _ from 'lodash';
 
 import APINotLoaded from 'display/not_loaded';
 import ChangesLinks from 'display/changes/links';
@@ -22,7 +23,7 @@ import * as api from 'server/api';
 import * as utils from 'utils/utils';
 import custom_content_hook from 'utils/custom_content';
 
-var HomePage = React.createClass({
+export default React.createClass({
   propTypes: {
     author: PropTypes.string
   },
@@ -71,7 +72,7 @@ var HomePage = React.createClass({
         <APINotLoadedPage
           highlight="My Changes"
           calls={this.state.commits}
-          oldUI="/projects/"
+          oldUI="/projects"
         />
       );
     }
@@ -83,13 +84,10 @@ var HomePage = React.createClass({
       var commit_sources = this.state.commits.getReturnedData();
       // Pull author name from the first build of the first source with a build.
       // They should all be the same.
-      var first_build = _.chain(commit_sources)
-        .map(function(s) {
-          return s.builds;
-        })
-        .flatten(true)
-        .first()
-        .value();
+      var first_build = commit_sources
+        .map(s => s.builds)
+        .reduce((a, b) => a.concat(b))
+        .find(s => true);
       var full_name = null;
       if (first_build) {
         full_name = ` (${first_build.author.name})`;
@@ -120,7 +118,7 @@ var HomePage = React.createClass({
     }
 
     return (
-      <ChangesPage highlight="My Changes" oldUI="/projects/">
+      <ChangesPage highlight="My Changes" oldUI="/projects">
         {header_markup}
         <div className="nonFixedClass">
           <Diffs diffs={this.state.diffs} author={this.props.author} />
@@ -137,7 +135,7 @@ var HomePage = React.createClass({
     var login_href = '/auth/login/?orig_url=' + current_location;
 
     return (
-      <ChangesPage highlight="My Changes" oldUI="/projects/">
+      <ChangesPage highlight="My Changes" oldUI="/projects">
         <div className="marginBottomL">
           <a href={login_href}>Log in</a>, to see your recent diffs and commits.
         </div>
@@ -168,7 +166,7 @@ var Diffs = React.createClass({
 
     var diffs = this.props.diffs.getReturnedData();
 
-    var grid_data = _.map(diffs, d => {
+    var grid_data = diffs.map(d => {
       var ident = 'D' + d.id;
 
       var title = d['title'];
@@ -258,18 +256,18 @@ var Commits = React.createClass({
     var grid_data = [];
     commits.forEach(c => {
       // Render links to the projects that ran builds (for user convenience..)
-      var project_links = _.chain(c.builds)
-        .map(b => b.project)
-        .compact()
-        .uniq(p => p.slug)
-        .sortBy(p => p.name)
-        .map(p =>
+      var project_links = _.flow(
+        _.map(b => b.project),
+        _.compact,
+        _.uniq(p => p.slug),
+        _.sortBy(p => p.name),
+        _.map(p =>
           <div>
             {ChangesLinks.project(p)}
           </div>
-        )
-        .flatten()
-        .value();
+        ),
+        _.flatten
+      )(c.builds);
 
       var name = utils.truncate(utils.first_line(c.revision.message));
       if (c.builds.length > 0) {
@@ -344,31 +342,29 @@ var Projects = React.createClass({
 
     var projects = projects_api.getReturnedData();
 
-    var project_entries = _.compact(
-      _.map(projects, p => {
-        var color_cls = '';
-        var condition = COND_NO_BUILDS;
+    var project_entries = projects.map(p => {
+      var color_cls = '';
+      var condition = COND_NO_BUILDS;
 
-        if (p.lastBuild) {
-          // ignore projects over a week old
-          if (ChangesUI.projectIsStale(p.lastBuild)) {
-            return null;
-          }
-
-          condition = get_runnable_condition(p.lastBuild);
-          color_cls = get_runnable_condition_color_cls(condition);
+      if (p.lastBuild) {
+        // ignore projects over a week old
+        if (ChangesUI.projectIsStale(p.lastBuild)) {
+          return null;
         }
 
-        var icon = get_runnable_condition_icon(condition);
+        condition = get_runnable_condition(p.lastBuild);
+        color_cls = get_runnable_condition_color_cls(condition);
+      }
 
-        return (
-          <a className={color_cls} href={ChangesLinks.projectHref(p)}>
-            {icon}
-            {p.name}
-          </a>
-        );
-      })
-    );
+      var icon = get_runnable_condition_icon(condition);
+
+      return (
+        <Link key={p.slug} className={color_cls} to={`/projects/${p.slug}`}>
+          {icon}
+          {p.name}
+        </Link>
+      );
+    });
 
     // render names in 3 columns
     var num_per_column = Math.ceil(project_entries.length / 3);
@@ -377,7 +373,7 @@ var Projects = React.createClass({
     var column3 = project_entries.slice(num_per_column * 2);
     var zipped = _.zip(column1, column2, column3);
 
-    var project_rows = _.map(zipped, items => {
+    var project_rows = zipped.map(items => {
       var [v1, v2, v3] = items;
       return (
         <tr>
@@ -411,7 +407,7 @@ var Projects = React.createClass({
         {project_table}
         <div className="darkGray marginTopM">
           Projects that haven{"'"}t run a build in the last week are not shown. See all on
-          the <a href="/projects/">Projects page</a>
+          the <a href="/projects">Projects page</a>
         </div>
       </div>
     );
@@ -442,5 +438,3 @@ var UserOptions = React.createClass({
     );
   }
 });
-
-export default HomePage;

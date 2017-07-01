@@ -2,7 +2,6 @@ import React, {PropTypes} from 'react';
 import idx from 'idx';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
 import URI from 'urijs';
-import _ from 'underscore';
 
 import APINotLoaded from 'display/not_loaded';
 import SectionHeader from 'display/section_header';
@@ -21,7 +20,7 @@ import * as api from 'server/api';
 
 import * as utils from 'utils/utils';
 
-let AdminPage = React.createClass({
+export default React.createClass({
   mixins: [LinkedStateMixin],
 
   menuItems: [
@@ -68,7 +67,7 @@ let AdminPage = React.createClass({
 
     var interactives = [this.state.repositoriesInteractive, this.state.usersInteractive];
 
-    _.each(interactives, interactive => {
+    interactives.forEach(interactive => {
       if (!interactive.hasRunInitialize()) {
         interactive.initialize({});
       }
@@ -143,7 +142,7 @@ let AdminPage = React.createClass({
     let projects = this.state.projects.getReturnedData();
 
     let rows = [];
-    _.each(projects, project => {
+    projects.forEach(project => {
       rows.push([
         ChangesLinks.projectAdmin(project),
         project.status.name,
@@ -171,7 +170,7 @@ let AdminPage = React.createClass({
 
     let repositories = interactive.getDataToShow().getReturnedData();
     let rows = [];
-    _.each(repositories, repository => {
+    repositories.forEach(repository => {
       rows.push([
         ChangesLinks.repositoryAdmin(repository),
         repository.status.name,
@@ -207,7 +206,7 @@ let AdminPage = React.createClass({
     let users = interactive.getDataToShow().getReturnedData();
     let rows = [];
 
-    _.each(users, user => {
+    users.forEach(user => {
       let params = {};
       let isAdmin = user.isAdmin ? 'Yes' : 'No';
       params['is_admin'] = !user.isAdmin;
@@ -440,5 +439,3 @@ let AdminMessageFieldGroup = React.createClass({
     );
   }
 });
-
-export default AdminPage;

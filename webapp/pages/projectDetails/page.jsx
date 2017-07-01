@@ -1,28 +1,23 @@
 import React, {PropTypes} from 'react';
 import URI from 'urijs';
 import {OverlayTrigger, Tooltip} from 'react-bootstrap';
-import _ from 'underscore';
 
 import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
 import {ProgrammingError} from 'display/errors';
 import {Tabs, MenuUtils} from 'display/menus';
 
-import BuildsTab from 'pages/project_page/builds_tab';
-import CommitsTab from 'pages/project_page/commits_tab';
-import DetailsTab from 'pages/project_page/details_tab';
+import BuildsTab from './builds_tab';
+import CommitsTab from './commits_tab';
+import DetailsTab from './details_tab';
+import TestsTab from './tests_tab';
 import InteractiveData from 'pages/helpers/interactive_data';
-import TestsTab from 'pages/project_page/tests_tab';
 
 import * as api from 'server/api';
 
 import * as utils from 'utils/utils';
 
-var ProjectPage = React.createClass({
-  propTypes: {
-    projectSlug: PropTypes.string.isRequired
-  },
-
-  getInitialState: function() {
+export default React.createClass({
+  getInitialState() {
     return {
       selectedItem: null, // we set this in componentWillMount
       project: null,
@@ -42,38 +37,34 @@ var ProjectPage = React.createClass({
 
   menuItems: ['Commits', 'Builds', 'Tests', 'Details'],
 
-  componentWillMount: function() {
+  componentWillMount() {
     // if our url contains a hash, show that tab
     var selected_item_from_hash = MenuUtils.selectItemFromHash(
       window.location.hash,
       this.menuItems
     );
 
-    // when we first came to this page, which tab was shown? Used by the
-    // initial data fetching within tabs
     this.initialTab = selected_item_from_hash || 'Commits';
-
-    this.setState({selectedItem: this.initialTab});
 
     // initialize our paging objects. Data fetching still doesn't happen
     // till componentDidMount (either ours or the subcomponent.)
     this.setState({
+      selectedItem: this.initialTab,
       buildsInteractive: InteractiveData(
         this,
         'buildsInteractive',
-        BuildsTab.getEndpoint(this.props.projectSlug)
+        BuildsTab.getEndpoint(this.props.params.projectSlug)
       ),
-
       commitsInteractive: InteractiveData(
         this,
         'commitsInteractive',
-        CommitsTab.getEndpoint(this.props.projectSlug)
+        CommitsTab.getEndpoint(this.props.params.projectSlug)
       )
     });
   },
 
-  componentDidMount: function() {
-    var slug = this.props.projectSlug;
+  componentDidMount() {
+    var slug = this.props.params.projectSlug;
 
     // grab the initial project data needed to render anything. We also eagerly
     // grab some data for our tabs so that they load faster
@@ -186,7 +177,7 @@ var ProjectPage = React.createClass({
       var whitelist_paths = utils.split_lines(whitelist_option);
       var whitelist_tooltip = (
         <Tooltip>
-          {_.map(whitelist_paths, p =>
+          {whitelist_paths.map(p =>
             <div>
               {p}
             </div>
@@ -232,5 +223,3 @@ var ProjectPage = React.createClass({
     );
   }
 });
-
-export default ProjectPage;

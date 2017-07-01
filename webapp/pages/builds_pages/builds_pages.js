@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react';
 import moment from 'moment';
 import URI from 'urijs';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import ChangesLinks from 'display/changes/links';
 import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
@@ -69,7 +69,7 @@ export const DiffPage = React.createClass({
     diff_data['revision_id'] = diff_data['revision_id'] || this.props.diff_id.substr(1);
     diff_data['dateCreated'] = diff_data['dateCreated'] || 0; // unix timestamp
 
-    var builds = _.chain(diff_data.changes).pluck('builds').flatten().value();
+    var builds = _.flow(_.pluck('builds'), _.flatten())(diff_data.changes);
 
     return <BuildsPage type="diff" targetData={diff_data} builds={builds} />;
   }
@@ -137,7 +137,7 @@ export const CommitPage = React.createClass({
         return <APINotLoadedPage calls={this.state.commitBuilds} />;
       }
 
-      var links = _.map(this.state.commitBuilds.getReturnedData(), b => {
+      var links = this.state.commitBuilds.getReturnedData().map(b => {
         var href = URI(`/single_build/${b.id}/`);
         var condition = get_runnable_condition(b);
         return (
@@ -276,7 +276,7 @@ export default React.createClass({
     var builds = this.props.builds;
 
     if (this.state.activeBuildID) {
-      var build = _.filter(builds, b => b.id === this.state.activeBuildID);
+      var build = builds.filter(b => b.id === this.state.activeBuildID);
       if (build) {
         // use a key so that we remount when switching builds
         return React.addons.createFragment({
@@ -291,7 +291,7 @@ export default React.createClass({
     if (this.props.type === 'diff') {
       var builds_by_diff_id = _.groupBy(builds, b => b.source.data['phabricator.diffID']);
 
-      var latest_diff_id = _.chain(builds_by_diff_id).keys().sortBy().last().value();
+      var latest_diff_id = _.flow(_.keys, _.sortBy, _.last)(builds_by_diff_id);
 
       latest_builds = builds_by_diff_id[latest_diff_id];
     }
@@ -391,7 +391,7 @@ export default React.createClass({
     // the author of any cause=phabricator build for a diff is always the
     // same as the author of the diff.
     var author = null;
-    _.each(builds, b => {
+    builds.forEach(b => {
       if (get_build_cause(b) === 'phabricator') {
         author = b.author;
       }

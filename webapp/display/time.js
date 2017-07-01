@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react';
 import moment from 'moment';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import Examples from 'display/examples';
 
@@ -114,7 +114,7 @@ export const TimeText = React.createClass({
 // format. Useful to render how long its been since a build started
 export const LiveTime = React.createClass({
   propTypes: {
-    time: PropTypes.number
+    time: PropTypes.number.isRequired
   },
 
   getInitialState: function() {
@@ -151,45 +151,19 @@ export const LiveTime = React.createClass({
     );
   },
 
-  // timer code
-
-  statics: {
-    instances: {},
-    refreshTimer: null
-  },
-
   componentDidMount() {
-    this.uniqueID = utils.randomID();
-    LiveTime.instances[this.uniqueID] = this;
-
-    if (!LiveTime.refreshTimer) {
-      LiveTime.refreshTimer = setInterval(arg => {
-        _.each(LiveTime.instances, (val, key) => {
-          if (!val) {
-            return;
-          }
-          if (val.isMounted()) {
-            val.setState({
-              // this just has to be monotonically increasing, so new Date is fine
-              lastUpdated: Date.now()
-            });
-          }
-        });
-        // this isn't going to be that smooth :/, but do I really want to change
-        // it to something like 250ms?
-      }, 1000);
-    }
+    this.refreshTimer = setInterval(arg => {
+      this.setState({
+        // this just has to be monotonically increasing, so new Date is fine
+        lastUpdated: Date.now()
+      });
+      // this isn't going to be that smooth :/, but do I really want to change
+      // it to something like 250ms?
+    }, 1000);
   },
 
-  componentWillUnmount: function() {
-    LiveTime.instances[this.uniqueID] = null;
-    var timersLeft = _.any(LiveTime.instances, (v, k) => v);
-
-    if (!timersLeft && LiveTime.refreshTimer) {
-      // technically I should console.error if refreshTimer is missing
-      clearInterval(LiveTime.refreshTimer);
-      LiveTime.refreshTimer = null;
-    }
+  componentWillUnmount() {
+    clearInterval(this.refreshTimer);
   }
 });
 

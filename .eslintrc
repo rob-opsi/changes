@@ -13,7 +13,7 @@
   ],
   "rules": {
     // don't warn about variable names that aren't in camelcase. Enough code
-    // has already been written with underscores that I'm just disabling this
+    // has already been written with lodashs that I'm just disabling this
     // for now.
     "camelcase": [0],
     // don't warn about missing 'use strict'. I'm 90% sure the babel loader

@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react';
 import URI from 'urijs';
 import {Modal} from 'react-bootstrap';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import ChangesLinks from 'display/changes/links';
 import SimpleTooltip from 'display/simple_tooltip';
@@ -133,9 +133,6 @@ var LogComponent = React.createClass({
     // kick off our polling logic: a series of setTimeouts that update state as
     // new data comes in
     this.refreshTimer = window.setTimeout(__ => {
-      if (!this.isMounted()) {
-        return;
-      }
       this.pollForUpdates();
     }, POLL_INTERVAL);
 
@@ -152,9 +149,7 @@ var LogComponent = React.createClass({
 
   componentWillUnmount: function() {
     // clear the timer, if in use (e.g. the widget is expanded)
-    if (this.refreshTimer) {
-      clearInterval(this.refreshTimer);
-    }
+    window.clearInterval(this.refreshTimer);
   },
 
   render: function() {
@@ -169,12 +164,12 @@ var LogComponent = React.createClass({
     var tooManyLines = false;
     var isFinished = false;
     var lines = [];
-    _.each(apiCallsToRender, apiCall => {
+    apiCallsToRender.forEach(apiCall => {
       if (is_eof(apiCall)) {
         isFinished = true;
       }
-      _.each(apiCall.chunks, chunk => {
-        _.each(strip_ansi(chunk.text).split('\n'), line => {
+      apiCall.chunks.forEach(chunk => {
+        strip_ansi(chunk.text).split('\n').forEach(line => {
           if (lines.length >= MAX_LOG_LINES) {
             tooManyLines = true;
             return;
@@ -226,14 +221,14 @@ var LogComponent = React.createClass({
   renderDebugContent() {
     var initialLog = this.state.initialLog;
 
-    var allApiCalls = [initialLog.getReturnedData()].concat(this.state.newLogs);
+    var allApiCalls = [...initialLog.getReturnedData(), ...this.state.newLogs];
 
     var data = [];
 
     var source = 0;
     var expectedOffset = 0;
-    _.each(allApiCalls, call => {
-      _.each(call.chunks, chunk => {
+    allApiCalls.forEach(call => {
+      call.chunks.forEach(chunk => {
         var icon =
           chunk.offset === expectedOffset
             ? <SimpleTooltip label="This offset looks correct">
@@ -328,25 +323,25 @@ var LogComponent = React.createClass({
     );
   },
 
-  componentWillUpdate: function() {
+  componentWillUpdate() {
     // keep us scrolled all the way at the bottom if we're already there
     this.shouldScrollBottom =
       window.innerHeight + window.scrollY >= document.body.offsetHeight;
   },
 
-  componentDidUpdate: function() {
+  componentDidUpdate() {
     if (this.shouldScrollBottom) {
       this.scrollToBottom();
     }
   },
 
-  scrollToBottom: function() {
+  scrollToBottom() {
     // http://blog.vjeux.com/2013/javascript/scroll-position-with-react.html
     // is a nice link to look at if you're modifying/debugging this
     window.scrollTo(0, document.body.scrollHeight);
   },
 
-  pollForUpdates: function() {
+  pollForUpdates() {
     var latestData = this.state.initialLog.getReturnedData();
     if (this.state.newLogs.length > 0) {
       latestData = _.last(this.state.newLogs);
@@ -365,24 +360,20 @@ var LogComponent = React.createClass({
       return;
     }
 
-    var elem = this;
-    var handle_response = function(response, was_success) {
+    var handle_response = (response, was_success) => {
       if (!was_success) {
-        elem.setState({updateError: response});
+        this.setState({updateError: response});
         return;
       }
 
-      elem.setState((prev_state, current_props) => {
+      this.setState((prev_state, current_props) => {
         return {
           newLogs: prev_state.newLogs.concat([JSON.parse(response.responseText)])
         };
       });
 
-      elem.refreshTimer = window.setTimeout(_ => {
-        if (!elem.isMounted()) {
-          return;
-        }
-        elem.pollForUpdates();
+      this.refreshTimer = window.setTimeout(_ => {
+        this.pollForUpdates();
       }, POLL_INTERVAL);
     };
 

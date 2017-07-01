@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react';
 import {Popover, OverlayTrigger, Tooltip} from 'react-bootstrap';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import ChangesLinks from 'display/changes/links';
 import {Button} from 'display/button';
@@ -42,14 +42,14 @@ export const ManyBuildsStatus = React.createClass({
     // grab the latest builds for each project
     var builds_by_project = _.groupBy(builds_for_last_code_change, b => b.project.slug);
     var latest_builds = _.map(builds_by_project, builds => {
-      return _.chain(builds).sortBy(b => b.dateCreated).last().value();
+      return _.flow(_.sortBy(b => b.dateCreated), _.last())(builds);
     });
 
     // TOOD: how to order projects? Right now, I do it alphabetically by project name...
     // I think that makes this easiest to instantly parse every time someone views this.
     latest_builds = _.sortBy(latest_builds, b => b.project.name);
 
-    var tooltip_markup = _.map(latest_builds, b => {
+    var tooltip_markup = latest_builds.map(b => {
       var subtext = buildSummaryText(b, true);
 
       return (
@@ -110,7 +110,7 @@ export const SingleBuildStatus = React.createClass({
     var href = ChangesLinks.buildHref(build);
 
     var error_count = build.failures
-      ? _.filter(build.failures, f => f.id !== 'test_failures').length
+      ? build.failures.filter(f => f.id !== 'test_failures').length
       : 0; // if its 0, we don't know whether there are 0 failures or if the
     // backend didn't return this info
     var dotNum = null;
@@ -201,7 +201,7 @@ export const SingleBuildStatus = React.createClass({
     if (elem.state[state_key] && api.isLoaded(elem.state[state_key][build.id])) {
       var data = elem.state[state_key][build.id].getReturnedData();
       var tests = data.testFailures.tests.slice(0, this.MAX_TESTS_IN_TOOLTIP);
-      var list = _.map(tests, t => {
+      var list = tests.map(t => {
         return (
           <div key={'test-id-key:' + t.id}>
             {t.shortName}
@@ -317,7 +317,7 @@ export const buildsForLastCodeChange = function(builds) {
 
   // we only do something if every build is from the same phabricator revision
   // id
-  _.each(builds, build => {
+  builds.forEach(build => {
     var build_revision_id =
       build.source.patch && build.source.data['phabricator.revisionID'];
 
@@ -338,5 +338,5 @@ export const buildsForLastCodeChange = function(builds) {
   }
 
   var latest_diff_id = diff_ids[0];
-  return _.filter(builds, b => b.source.data['phabricator.diffID'] === latest_diff_id);
+  return builds.filter(b => b.source.data['phabricator.diffID'] === latest_diff_id);
 };

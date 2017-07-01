@@ -1,7 +1,7 @@
 import React, {PropTypes} from 'react';
 import classNames from 'classnames';
 import moment from 'moment';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import APINotLoaded from 'display/not_loaded';
 import SectionHeader from 'display/section_header';
@@ -84,7 +84,7 @@ export const BuildTestsPage = React.createClass({
   },
 
   componentDidMount: function() {
-    _.each([['testList', TEST_LIST], ['targetList', TARGET_LIST]], tabs => {
+    [['testList', TEST_LIST], ['targetList', TARGET_LIST]].forEach(tabs => {
       var [stateKey, tabName] = tabs;
       var params = {};
       if (this.initialTab === tabName) {
@@ -169,7 +169,7 @@ export const BuildTestsPage = React.createClass({
     var project = this.state.buildInfo.getReturnedData().project;
 
     var rows = [];
-    _.each(failedTests, test => {
+    failedTests.forEach(test => {
       // skip 'quarantined_passed' tests
       if (test.result.indexOf('passed') >= 0) {
         return;
@@ -283,7 +283,7 @@ export const BuildTestsPage = React.createClass({
     let tests = interactive.getDataToShow().getReturnedData();
 
     var rows = [];
-    _.each(tests, test => {
+    tests.forEach(test => {
       var onClick = __ => {
         this.setState(
           utils.update_key_in_state_dict(
@@ -435,7 +435,7 @@ export const BuildTestsPage = React.createClass({
 
     let targets = interactive.getDataToShow().getReturnedData();
     var rows = [];
-    _.each(targets, target => {
+    targets.forEach(target => {
       var onClick = __ => {
         this.setState(
           utils.update_key_in_state_dict(
@@ -481,7 +481,7 @@ export const BuildTestsPage = React.createClass({
       rows.push(rowData);
 
       if (this.state.expandedAllTargets[target.id]) {
-        let messageDisplays = _.map(target.messages, message => {
+        let messageDisplays = target.messages.forEach(message => {
           return (
             <p key={message.id} className="targetMessage">
               {message.text}
@@ -599,7 +599,7 @@ var ShardingTab = React.createClass({
 
   getInitialState: function() {
     var jobPhases = {};
-    _.each(this.props.build.jobs, j => {
+    this.props.build.jobs.forEach(j => {
       jobPhases[j.id] = null;
     });
 
@@ -612,10 +612,10 @@ var ShardingTab = React.createClass({
 
   componentDidMount: function() {
     // phases/jobsteps info
-    var jobIDs = _.map(this.props.build.jobs, j => j.id);
+    var jobIDs = this.props.build.jobs.map(j => j.id);
 
     var endpoint_map = {};
-    _.each(jobIDs, id => {
+    jobIDs.forEach(id => {
       endpoint_map[id] = `/api/0/jobs/${id}/phases?test_counts=1`;
     });
 
@@ -625,30 +625,30 @@ var ShardingTab = React.createClass({
 
   render: function() {
     var build = this.props.build;
-    var jobIDs = _.map(build.jobs, j => j.id);
+    var jobIDs = build.jobs.map(j => j.id);
 
-    var phasesCalls = _.chain(this.state.jobPhases).pick(jobIDs).values().value();
+    var phasesCalls = _.flow(_.pick(jobIDs), _.values)(this.state.jobPhases);
 
     if (!api.allLoaded(phasesCalls)) {
       return <APINotLoaded calls={phasesCalls} />;
     }
 
     var markup = [];
-    _.each(jobIDs, jobID => {
-      var job = _.filter(build.jobs, j => j.id === jobID)[0];
+    jobIDs.forEach(jobID => {
+      var job = build.jobs.filter(j => j.id === jobID)[0];
       markup.push(
         <SectionHeader>
           {job.name}
         </SectionHeader>
       );
       var rows = [];
-      _.each(this.state.jobPhases[jobID].getReturnedData(), phase => {
+      this.state.jobPhases[jobID].getReturnedData().forEach(phase => {
         // Filter out steps with missing weights and then sort by descending weight.
         var steps = _.sortBy(
-          _.filter(phase.steps, step => step.data.weight),
+          phase.steps.filter(step => step.data.weight),
           step => -step.data.weight
         );
-        _.each(steps, step => {
+        steps.forEach(step => {
           var onClick = evt => {
             this.setState(
               utils.update_key_in_state_dict(

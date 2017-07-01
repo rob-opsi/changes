@@ -1,13 +1,12 @@
 /*eslint-env node*/
 
-var path = require('path'),
-  webpack = require('webpack');
+var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 module.exports = {
   entry: {
-    app: './webapp',
-    vendor: ['react', 'react-dom']
+    app: './webapp'
   },
   module: {
     loaders: [
@@ -40,6 +39,7 @@ module.exports = {
       }
     ]
   },
+  plugins: [new LodashModuleReplacementPlugin()],
   resolve: {
     modules: [path.resolve('node_modules'), path.resolve('webapp')],
     extensions: ['*', '.jsx', '.js', '.json']

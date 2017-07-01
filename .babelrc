@@ -21,7 +21,8 @@
         ]
       }
     ],
-    "idx"
+    "idx",
+    "lodash"
   ],
   "env": {
     "test": {

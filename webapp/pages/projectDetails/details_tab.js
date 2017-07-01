@@ -1,7 +1,9 @@
 import React, {PropTypes} from 'react';
 import URI from 'urijs';
-import _ from 'underscore';
+import idx from 'idx';
+import _ from 'lodash';
 
+import config from 'common/config';
 import APINotLoaded from 'display/not_loaded';
 import {InfoList, InfoItem} from 'display/info_list';
 
@@ -34,10 +36,7 @@ var DetailsTab = React.createClass({
     var project = this.props.project.getReturnedData();
 
     let editLink = null;
-    const isAdmin =
-      window.changesAuthData &&
-      window.changesAuthData.user &&
-      window.changesAuthData.user.isAdmin === true;
+    const isAdmin = idx(config.get('auth'), _ => _.user.isAdmin) === true;
     if (isAdmin) {
       editLink = (
         <a className="topRightLink" href={`/admin_project/${project.slug}/`}>

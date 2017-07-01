@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import {Error} from 'display/errors';
 import {FlashMessage, SUCCESS, FAILURE} from 'display/flash';
@@ -36,7 +36,7 @@ var APIResponsePrototype = {
     }
 
     var links = {};
-    _.each(header.split(','), str => {
+    header.split(',').forEach(str => {
       var match = /<([^>]+)>; rel="([^"]+)"/g.exec(str);
       links[match[2]] = match[1];
     });
@@ -102,30 +102,28 @@ var fetchMapWithParams = function(
   }
 
   // add a bunch of "loading" APIResponse objects to the element state
+  let responses = {};
+  Object.keys(endpoint_map).forEach(k => {
+    responses[k] = APIResponse(k);
+  });
+
   if (map_key) {
     // we preserve other elements in the map
     elem.setState((previous_state, props) => {
-      var new_map = _.extend(
-        {},
-        previous_state[map_key],
-        _.mapObject(endpoint_map, endpoint => {
-          return APIResponse(endpoint);
-        })
-      );
-      var state_to_set = {};
-      state_to_set[map_key] = new_map;
-      return state_to_set;
+      return {
+        [map_key]: {
+          ...previous_state[map_key],
+          ...responses
+        }
+      };
     });
   } else {
-    elem.setState(
-      _.mapObject(endpoint_map, endpoint => {
-        return APIResponse(endpoint);
-      })
-    );
+    elem.setState(responses);
   }
 
   let success_count = 0;
-  _.each(endpoint_map, (endpoint, state_key) => {
+  Object.keys(endpoint_map).map(state_key => {
+    let endpoint = endpoint_map[state_key];
     var params = param_map[state_key];
     var ajax_response = function(response, was_success) {
       if (!elem.isMounted()) {
@@ -142,8 +140,9 @@ var fetchMapWithParams = function(
 
       var state_to_set = null;
       if (!map_key) {
-        state_to_set = {};
-        state_to_set[state_key] = api_response;
+        state_to_set = {
+          [state_key]: api_response
+        };
       } else {
         state_to_set = utils.update_key_in_state_dict(map_key, state_key, api_response);
       }
@@ -202,7 +201,7 @@ export const allLoaded = function(list_of_calls) {
  * For keys in map, did any of the api calls return an error?
  */
 export const anyErrors = function(list_of_calls) {
-  return _.any(list_of_calls, l => l && l.condition === 'error');
+  return !!list_of_calls.find(l => l && l.condition === 'error');
 };
 
 /*
@@ -211,7 +210,7 @@ export const anyErrors = function(list_of_calls) {
  */
 export const allErrorResponses = function(list_of_calls) {
   var responses = [];
-  _.each(list_of_calls, l => {
+  list_of_calls.forEach(l => {
     if (l && l.condition === 'error') {
       responses.push(l.response);
     }

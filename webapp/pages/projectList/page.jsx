@@ -1,6 +1,6 @@
 import React from 'react';
 import moment from 'moment';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import ChangesLinks from 'display/changes/links';
 import ChangesUI from 'display/changes/ui';
@@ -17,7 +17,7 @@ import * as api from 'server/api';
 
 import * as utils from 'utils/utils';
 
-var AllProjectsPage = React.createClass({
+export default React.createClass({
   getInitialTitle: function() {
     return 'All Projects';
   },
@@ -162,7 +162,7 @@ var AllProjectsPage = React.createClass({
     ];
 
     // group builds
-    _.each(projects_data, p => {
+    projects_data.forEach(p => {
       if (!p.lastBuild) {
         groups[groups.length - 1].projects.push(p);
       } else {
@@ -204,7 +204,7 @@ var AllProjectsPage = React.createClass({
       return null;
     }
 
-    var grid_data = _.map(projects_data, p => {
+    var grid_data = projects_data.map(p => {
       var widget = null,
         build_time = null;
       if (p.lastBuild) {
@@ -237,7 +237,7 @@ var AllProjectsPage = React.createClass({
   renderByRepo: function(projects_data) {
     var rows = [];
     var by_repo = _.groupBy(projects_data, p => p.repository.id);
-    _.each(by_repo, repo_projects => {
+    by_repo.forEach(repo_projects => {
       var repo_url = repo_projects[0].repository.url;
       var repo_name = ChangesUI.getShortRepoName(repo_url);
       if (repo_projects.length > 1) {
@@ -254,7 +254,7 @@ var AllProjectsPage = React.createClass({
         </div>
       );
 
-      var repo_rows = _.map(repo_projects, (p, index) => {
+      var repo_rows = repo_projects.map((p, index) => {
         var triggers = 'Never';
         if (
           p.options['phabricator.diff-trigger'] === '1' &&
@@ -269,7 +269,7 @@ var AllProjectsPage = React.createClass({
 
         var whitelist = '';
         if (p.options['build.file-whitelist']) {
-          whitelist = _.map(utils.split_lines(p.options['build.file-whitelist']), l =>
+          whitelist = utils.split_lines(p.options['build.file-whitelist']).map(l =>
             <div>
               {l}
             </div>
@@ -310,9 +310,9 @@ var AllProjectsPage = React.createClass({
    */
   renderPlans: function(projects_data) {
     var rows = [];
-    _.each(projects_data, proj => {
+    projects_data.forEach(proj => {
       var num_plans = proj.plans.length;
-      _.each(proj.plans, (plan, index) => {
+      proj.plans.forEach((plan, index) => {
         var proj_name = '';
         if (index === 0) {
           var proj_name =
@@ -375,22 +375,22 @@ var AllProjectsPage = React.createClass({
    * Clusters build plans by type
    */
   renderPlansByType: function(projects_data) {
-    var every_plan = _.flatten(_.map(projects_data, p => p.plans));
+    var every_plan = _.flatten(projects_data.map(p => p.plans));
 
-    var every_plan_type = _.chain(every_plan)
-      .map(p => (p.steps.length > 0 ? this.getStepType(p.steps[0]) : ''))
-      .compact()
-      .uniq()
+    var every_plan_type = _.flow(
+      _.map(p => (p.steps.length > 0 ? this.getStepType(p.steps[0]) : '')),
+      _.compact,
+      _.uniq,
       // sort, hoisting build types starting with [LXC] to the top
-      .sortBy(t => (t.charAt(0) === '[' ? '0' + t : t))
-      .value();
+      _.sortBy(t => (t.charAt(0) === '[' ? '0' + t : t))
+    )(every_plan);
 
     var rows_lists = [];
-    _.each(every_plan_type, type => {
+    every_plan_type.forEach(type => {
       // find every plan that matches this type and render it
       var plan_rows = [];
-      _.each(projects_data, proj => {
-        _.each(proj.plans, (plan, index) => {
+      projects_data.forEach(proj => {
+        proj.plans.forEach((plan, index) => {
           if (plan.steps.length > 0 && this.getStepType(plan.steps[0]) === type) {
             plan_rows.push([
               null,
@@ -431,22 +431,22 @@ var AllProjectsPage = React.createClass({
    * Group build plans by cluster
    */
   renderPlansByCluster: function(projects_data) {
-    var every_plan = _.flatten(_.map(projects_data, p => p.plans));
+    var every_plan = _.flatten(projects_data.map(p => p.plans));
 
-    var every_plan_type = _.chain(every_plan)
-      .map(p => (p.steps.length > 0 ? this.getStepCluster(p.steps[0]) : ''))
-      .compact()
-      .uniq()
-      .sort()
-      .value();
+    var every_plan_type = _.flow(
+      _.map(p => (p.steps.length > 0 ? this.getStepCluster(p.steps[0]) : '')),
+      _.compact,
+      _.uniq,
+      _.sortBy
+    )(every_plan);
 
     var rows_lists = [];
-    _.each(every_plan_type, type => {
+    every_plan_type.forEach(type => {
       // find every plan that matches this cluster and render it
       var plan_rows = [];
       var plan_count = 0;
-      _.each(projects_data, proj => {
-        _.each(proj.plans, (plan, index) => {
+      projects_data.forEach(proj => {
+        proj.plans.forEach((plan, index) => {
           if (plan.steps.length > 0 && this.getStepCluster(plan.steps[0]) === type) {
             plan_rows.push([
               null,
@@ -492,8 +492,8 @@ var AllProjectsPage = React.createClass({
     // ignore trailing slash for urls
     var del_trailing_slash = url => url.replace(/\/$/, '');
 
-    _.each(projects_data, proj => {
-      _.each(proj.plans, plan => {
+    projects_data.forEach(proj => {
+      proj.plans.forEach(plan => {
         plan.project = proj;
 
         // is there a plan?
@@ -508,7 +508,7 @@ var AllProjectsPage = React.createClass({
         var data = JSON.parse(plan.steps[0].data);
 
         if (data['jenkins_url']) {
-          _.each(utils.ensureArray(data['jenkins_url']), u => {
+          utils.ensureArray(data['jenkins_url']).forEach(u => {
             u = del_trailing_slash(u);
             plans_by_master[u] = plans_by_master[u] || {};
             plans_by_master[u]['master'] = plans_by_master[u]['master'] || [];
@@ -516,7 +516,7 @@ var AllProjectsPage = React.createClass({
           });
         }
         if (data['jenkins_diff_url']) {
-          _.each(utils.ensureArray(data['jenkins_diff_url']), u => {
+          utils.ensureArray(data['jenkins_diff_url']).forEach(u => {
             u = del_trailing_slash(u);
             plans_by_master[u] = plans_by_master[u] || {};
             plans_by_master[u]['diff'] = plans_by_master[u]['diff'] || [];
@@ -526,10 +526,10 @@ var AllProjectsPage = React.createClass({
       });
     });
 
-    var split_urls_for_display = utils.split_start_and_end(_.keys(plans_by_master));
+    var split_urls_for_display = utils.split_start_and_end(Object.keys(plans_by_master));
 
     var rows = [];
-    _.each(_.keys(plans_by_master).sort(), url => {
+    Object.keys(plans_by_master).sort().forEach(url => {
       var val = plans_by_master[url];
       val.master = val.master || [];
       val.diff = val.diff || [];
@@ -572,7 +572,7 @@ var AllProjectsPage = React.createClass({
         </span>
       );
 
-      _.each(val.master, (plan, index) => {
+      val.master.forEach((plan, index) => {
         rows.push([
           is_first_row ? toggleDisable : '',
           is_first_row ? first_row_text : '',
@@ -584,7 +584,7 @@ var AllProjectsPage = React.createClass({
         is_first_row = false;
       });
 
-      _.each(val.diff, (plan, index) => {
+      val.diff.forEach((plan, index) => {
         rows.push([
           is_first_row ? toggleDisable : '',
           is_first_row ? first_row_text : '',
@@ -706,7 +706,7 @@ var AllProjectsPage = React.createClass({
 
   getStepType: function(step) {
     var is_lxc = false;
-    _.each(utils.split_lines(step.data), line => {
+    utils.split_lines(step.data).forEach(line => {
       // look for a "build_type": "lxc" line
       if (line.indexOf('build_type') >= 0 && line.indexOf('lxc') >= 0) {
         is_lxc = true;
@@ -717,5 +717,3 @@ var AllProjectsPage = React.createClass({
     return is_jenkins_lxc ? '[LXC] ' + step.name : step.name;
   }
 });
-
-export default AllProjectsPage;

@@ -1,5 +1,5 @@
 import React, {PropTypes} from 'react';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import APINotLoaded from 'display/not_loaded';
 import ChangesLinks from 'display/changes/links';

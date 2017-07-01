@@ -1,6 +1,7 @@
 import React from 'react';
 import URI from 'urijs';
-import _ from 'underscore';
+import {Link} from 'react-router';
+import _ from 'lodash';
 
 import * as utils from 'utils/utils';
 
@@ -23,28 +24,27 @@ var ChangesLinks = {
   },
 
   projectAdmin: function(project) {
-    var href = ChangesLinks.projectAdminHref(project);
     return (
-      <a href={href}>
+      <Link to={`/admin/projects/${project.slug}`}>
         {project.name}
-      </a>
+      </Link>
     );
   },
 
   projectAdminHref: function(project) {
-    return `/admin_project/${project.slug}/`;
+    return `/admin/projects/${project.slug}`;
   },
 
   projectPlanAdminHref: function(project) {
-    return `/admin_project/${project.slug}#BuildPlans`;
+    return `/admin/projects/${project.slug}#BuildPlans`;
   },
 
   project: function(project) {
     var href = ChangesLinks.projectHref(project);
     return (
-      <a href={href}>
+      <Link to={href}>
         {project.name}
-      </a>
+      </Link>
     );
   },
 
@@ -58,7 +58,7 @@ var ChangesLinks = {
   },
 
   projectHref: function(project, tab = null) {
-    var href = `/project/${project.slug}/`;
+    var href = `/projects/${project.slug}`;
     if (tab) {
       href += '#' + tab;
     }
@@ -154,16 +154,15 @@ var ChangesLinks = {
   },
 
   repositoryAdmin: function(repository) {
-    var href = ChangesLinks.repositoryAdminHref(repository);
     return (
-      <a href={href}>
+      <Link to={`/admin/repos/${repository.id}`}>
         {repository.url}
-      </a>
+      </Link>
     );
   },
 
   repositoryAdminHref: function(repository) {
-    return `/admin_repository/${repository.id}`;
+    return `/admin/repos/${repository.id}`;
   },
 
   testHistoryHref(project, test_hash) {

@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react';
 import URI from 'urijs';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import APINotLoaded from 'display/not_loaded';
 import ChangesLinks from 'display/changes/links';
@@ -29,19 +29,19 @@ function getSkipReason(message) {
   return m && m[1];
 }
 
-var CommitsTab = React.createClass({
+const CommitsTab = React.createClass({
   propTypes: {
     // the project api response. Always loaded
     project: PropTypes.object,
 
     // InteractiveData...makes the chart interactive and paginates
-    interactive: PropTypes.object,
+    interactive: PropTypes.object.isRequired,
 
     // parent elem that has state
     pageElem: PropTypes.object.isRequired
   },
 
-  getInitialState: function() {
+  getInitialState() {
     return {};
   },
 
@@ -77,7 +77,7 @@ var CommitsTab = React.createClass({
     api.fetch(this, {branches: `/api/0/repositories/${repo_id}/branches`});
   },
 
-  render: function() {
+  render() {
     var interactive = this.props.interactive;
 
     if (interactive.hasNotLoadedInitialData()) {
@@ -119,7 +119,7 @@ var CommitsTab = React.createClass({
     } else if (!api.isLoaded(this.state.branches)) {
       branchNames = null;
     } else {
-      branchNames = _.chain(this.state.branches.getReturnedData()).pluck('name').value();
+      branchNames = this.state.branches.getReturnedData().map(x => x.name);
     }
     let onBranchChange = evt => {
       this.props.interactive.updateWithParams({branch: evt.target.value}, true);
@@ -140,10 +140,9 @@ var CommitsTab = React.createClass({
     var interactive = this.props.interactive;
     var dataToShow = interactive.getDataToShow().getReturnedData();
 
-    var builds = _.map(dataToShow, commit => {
+    var builds = dataToShow.map(commit => {
       if (commit.builds && commit.builds.length > 0) {
-        var sortedBuilds = _.sortBy(commit.builds, b => b.dateCreated).reverse();
-        return _.first(sortedBuilds);
+        return _.sortBy(commit.builds, b => b.dateCreated).reverse().find(() => true);
       } else {
         return {};
       }
@@ -167,11 +166,11 @@ var CommitsTab = React.createClass({
     );
   },
 
-  renderTable: function() {
+  renderTable() {
     var data_to_show = this.props.interactive.getDataToShow().getReturnedData(),
       project_info = this.props.project.getReturnedData();
 
-    var grid_data = _.map(data_to_show, c => this.turnIntoRow(c, project_info));
+    var grid_data = data_to_show.map(c => this.turnIntoRow(c, project_info));
 
     var cellClasses = [
       'buildWidgetCell',
@@ -226,7 +225,7 @@ var CommitsTab = React.createClass({
     );
   },
 
-  turnIntoRow: function(c, project_info) {
+  turnIntoRow(c, project_info) {
     var title = utils.truncate(utils.first_line(c.message));
     if (
       c.message.indexOf('!!skipthequeue') !== -1 ||
@@ -262,7 +261,7 @@ var CommitsTab = React.createClass({
       tests = null;
     if (c.builds && c.builds.length > 0) {
       var sorted_builds = _.sortBy(c.builds, b => b.dateCreated).reverse();
-      var last_build = _.first(sorted_builds);
+      var last_build = sorted_builds.find(() => true);
 
       build_widget = <SingleBuildStatus build={last_build} parentElem={this} />;
 
@@ -317,7 +316,7 @@ var CommitsTab = React.createClass({
     return row;
   },
 
-  renderPaging: function() {
+  renderPaging() {
     var links = this.props.interactive.getPagingLinks();
     return (
       <div className="marginBottomM marginTopM">
@@ -345,14 +344,11 @@ const BranchDropdown = ({defaultBranch, currentBranch, branchNames, onBranchChan
       </select>
     );
   } else {
-    let options = _.chain(branchNames)
-      .sortBy(_.identity)
-      .map(n =>
-        <option value={n} key={n}>
-          {n}
-        </option>
-      )
-      .value();
+    let options = branchNames.sort().map(n =>
+      <option value={n} key={n}>
+        {n}
+      </option>
+    );
     branch_dropdown = (
       <select onChange={onBranchChange} value={current_branch}>
         {options}

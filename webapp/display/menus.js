@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react';
 import URI from 'urijs';
-import _ from 'underscore';
+import _ from 'lodash';
 
 import Examples from 'display/examples';
 

@@ -1,6 +1,5 @@
 import React, {PropTypes} from 'react';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
-import _ from 'underscore';
 
 import SectionHeader from 'display/section_header';
 import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
@@ -13,7 +12,25 @@ import * as api from 'server/api';
 
 import * as utils from 'utils/utils';
 
-let AdminRepositoryPage = React.createClass({
+const ProjectList = React.createClass({
+  propTypes: {
+    projects: PropTypes.array.isRequired
+  },
+
+  getInitialState: function() {
+    return {};
+  },
+
+  render: function() {
+    let rows = this.props.projects.map(project => {
+      return [ChangesLinks.projectAdmin(project)];
+    });
+
+    return <Grid colnum={1} data={rows} headers={['Projects']} />;
+  }
+});
+
+export default React.createClass({
   menuItems: ['Settings', 'Projects'],
 
   getInitialState: function() {
@@ -188,23 +205,3 @@ let RepositorySettingsFieldGroup = React.createClass({
     return FieldGroupMarkup.create(form, 'Save Repository', this);
   }
 });
-
-let ProjectList = React.createClass({
-  propTypes: {
-    projects: PropTypes.array.isRequired
-  },
-
-  getInitialState: function() {
-    return {};
-  },
-
-  render: function() {
-    let rows = _.map(this.props.projects, project => {
-      return [ChangesLinks.projectAdmin(project)];
-    });
-
-    return <Grid colnum={1} data={rows} headers={['Projects']} />;
-  }
-});
-
-export default AdminRepositoryPage;
