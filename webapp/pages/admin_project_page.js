@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
 import URI from 'urijs';
+import _ from 'underscore';
 
 import SectionHeader from 'display/section_header';
 import {Button} from 'display/button';

@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react';
 import URI from 'urijs';
 import {OverlayTrigger, Tooltip} from 'react-bootstrap';
+import _ from 'underscore';
 
 import {ChangesPage, APINotLoadedPage} from 'display/page_chrome';
 import {ProgrammingError} from 'display/errors';
