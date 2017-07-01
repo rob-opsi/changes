@@ -203,8 +203,7 @@ def add(project, revision, source):
     return create_new_build(change, source, patch, project)
 
 
-def loop():
-    repository = mock.repository()
+def loop(repository):
     project = mock.project(repository)
     plan = mock.plan(project)
     get_or_create(Snapshot, where={
@@ -264,8 +263,12 @@ def simulate_local_repository():
     backend = identify_local_vcs()
 
     # Simulate the repository in a new project
-    repository = mock.repository(backend=backend,
-                                 status=RepositoryStatus.active)
+    repository = mock.repository(
+        backend=backend,
+        status=RepositoryStatus.active,
+        url=os.getcwd(),
+    )
+    print 'Created repository for {0} repository in {1} ({2})'.format(repository.backend, repository.url, repository.id)
     project = mock.project(repository)
     plan = mock.plan(project)
     get_or_create(Snapshot, where={
@@ -277,16 +280,23 @@ def simulate_local_repository():
         'status': SnapshotStatus.pending,
     })
 
+    # make sure we clone the repo
+    vcs = repository.get_vcs()
+    if vcs.exists():
+        vcs.update()
+    else:
+        vcs.clone()
+
     # Create some build data based off commits in the local repository
-    print 'Creating data based on {0} repository in {1}'.format(backend, os.getcwd())
-    vcs = get_vcs(repository)
     for lazy_revision in vcs.log(limit=10):
         revision, created, source = lazy_revision.save(repository)
         print '    Created revision {0} in {1}'.format(revision.sha, revision.branches)
         build = add(project, revision, source)
         print '    Inserted build {0} into {1}'.format(build.id, project.slug)
 
+    return repository
+
 
 if __name__ == '__main__':
-    simulate_local_repository()
-    loop()
+    repository = simulate_local_repository()
+    loop(repository)
