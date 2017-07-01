@@ -39,11 +39,14 @@ GOOGLE_CLIENT_SECRET = 'ask cramer or fill this in'
 GOOGLE_DOMAIN = None
 ```
 
+Create a repository to get things going:
+
+```shell
+bin/repos add --url git@github.com:getsentry/changes.git --backend git
+```
+
 Load the development server:
 
 ```shell
-bin/devserver
-
-# or with workers
 bin/devserver --workers
 ```
