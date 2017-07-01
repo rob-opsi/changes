@@ -55,5 +55,8 @@
   "devDependencies": {
     "eslint-config-prettier": "^2.3.0",
     "eslint-plugin-prettier": "^2.1.2"
+  },
+  "optionalDependencies": {
+    "fsevents": "^1.1.2"
   }
 }
