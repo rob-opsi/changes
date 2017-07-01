@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import idx from 'idx';
 import LinkedStateMixin from 'react-addons-linked-state-mixin';
 import URI from 'urijs';
 import _ from 'underscore';
@@ -384,7 +385,7 @@ let AdminMessageFieldGroup = React.createClass({
 
   getInitialState: function() {
     return {
-      messageText: this.props.message.message,
+      messageText: idx(this.props.message, _ => _.message) || '',
       error: ''
     };
   },
