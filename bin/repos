@@ -47,6 +47,7 @@ def get_repo(id_):
 
     return repo
 
+
 app = create_app()
 app_context = app.app_context()
 app_context.push()
@@ -56,7 +57,8 @@ parser = argparse.ArgumentParser(description='Manage repositories')
 subparsers = parser.add_subparsers(dest='command')
 
 parser_add = subparsers.add_parser('add', help='add repository')
-parser_add.add_argument('--url', metavar='url', dest='url', help='repository url')
+parser_add.add_argument('--url', metavar='url',
+                        dest='url', help='repository url')
 parser_add.add_argument(
     '--backend', metavar='backend', dest='backend',
     help='repository backend', choices=('git', 'hg', 'unknown'), default='unknown')
@@ -74,22 +76,30 @@ parser_show.add_argument('id', help='repository ID or url')
 
 parser_sync = subparsers.add_parser('sync', help='sync repository details')
 parser_sync.add_argument('id', help='repository ID or url', nargs='?')
-parser_sync.add_argument('-a', '--all', dest='all', action='store_true', help='all repositories', required=False)
+parser_sync.add_argument('-a', '--all', dest='all',
+                         action='store_true', help='all repositories', required=False)
+
+parser_import = subparsers.add_parser('import', help='import repository')
+parser_import.add_argument('id', help='repository ID or url', nargs='?')
 
 parser_list = subparsers.add_parser('list', help='list repositories')
 
-parser_options = subparsers.add_parser('options', help='manage repository options')
+parser_options = subparsers.add_parser(
+    'options', help='manage repository options')
 options_subparsers = parser_options.add_subparsers(dest='option_command')
 
-parser_options_set = options_subparsers.add_parser('set', help='set repository option')
+parser_options_set = options_subparsers.add_parser(
+    'set', help='set repository option')
 parser_options_set.add_argument('id', help='repository ID or url')
 parser_options_set.add_argument('option', help='key=value')
 
-parser_options_set = options_subparsers.add_parser('delete', help='delete repository option')
+parser_options_set = options_subparsers.add_parser(
+    'delete', help='delete repository option')
 parser_options_set.add_argument('id', help='repository ID or url')
 parser_options_set.add_argument('option', help='key')
 
-parser_options_get = options_subparsers.add_parser('get', help='get repository option')
+parser_options_get = options_subparsers.add_parser(
+    'get', help='get repository option')
 parser_options_get.add_argument('id', help='repository ID or url')
 parser_options_get.add_argument('option', help='key', nargs='?')
 
@@ -121,7 +131,7 @@ elif args.command == 'edit':
         repo.status = RepositoryStatus.active
 
     db.session.add(repo)
-    import_repo.delay(
+    import_repo(
         repo_id=repo.id.hex,
         task_id=repo.id.hex,
     )
@@ -133,6 +143,16 @@ elif args.command == 'edit':
 elif args.command == 'list':
     for repo in Repository.query.order_by(Repository.url.asc()):
         print(repo.url)
+
+elif args.command == 'import':
+    repo = get_repo(args.id)
+    import_repo(
+        repo_id=repo.id.hex,
+        task_id=repo.id.hex,
+    )
+    print("Saved repo with ID {%s}" % (
+        repo.id,
+    ))
 
 elif args.command == 'show':
     repo = get_repo(args.id)
