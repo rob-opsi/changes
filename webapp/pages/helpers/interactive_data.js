@@ -1,4 +1,5 @@
 import React from 'react';
+import URI from 'urijs';
 import _ from 'underscore';
 
 import ChangesUI from 'display/changes/ui';
