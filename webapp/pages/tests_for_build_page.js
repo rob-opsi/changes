@@ -1,9 +1,7 @@
 import React, {PropTypes} from 'react';
-import _ from 'underscore';
-
-import moment from 'moment';
-
 import classNames from 'classnames';
+import moment from 'moment';
+import _ from 'underscore';
 
 import APINotLoaded from 'display/not_loaded';
 import SectionHeader from 'display/section_header';

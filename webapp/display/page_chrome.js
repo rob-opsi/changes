@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
 import ReactDOM from 'react-dom';
+import moment from 'moment';
 import _ from 'underscore';
 
 import APINotLoaded from 'display/not_loaded';

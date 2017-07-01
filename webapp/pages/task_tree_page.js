@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import moment from 'moment';
 import _ from 'underscore';
 
 import SectionHeader from 'display/section_header';

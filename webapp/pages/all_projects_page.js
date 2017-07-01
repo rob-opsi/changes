@@ -1,4 +1,5 @@
 import React from 'react';
+import moment from 'moment';
 import _ from 'underscore';
 
 import ChangesLinks from 'display/changes/links';
