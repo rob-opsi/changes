@@ -1,7 +1,6 @@
 import React from 'react';
 import URI from 'urijs';
 import {Link} from 'react-router';
-import _ from 'lodash';
 
 import * as utils from 'utils/utils';
 
@@ -113,7 +112,7 @@ var ChangesLinks = {
   },
 
   phab: function(build) {
-    if (_.contains(build.tags, 'arc test')) {
+    if (build.tags.indexOf('arc test') !== -1) {
       return '';
     } else if (build.source.patch) {
       return (

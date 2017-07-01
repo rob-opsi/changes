@@ -84,7 +84,7 @@ var BuildsTab = React.createClass({
       </div>
     );
 
-    var data = _.map(data_to_show.getReturnedData(), build => {
+    var data = data_to_show.getReturnedData().map(build => {
       var target = ChangesLinks.phab(build);
 
       var duration = !is_waiting(get_runnable_condition(build))
