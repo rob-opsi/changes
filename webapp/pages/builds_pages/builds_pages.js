@@ -283,12 +283,7 @@ const BuildsPage = React.createClass({
 
     if (this.state.activeBuildID) {
       var build = builds.filter(b => b.id === this.state.activeBuildID);
-      if (build) {
-        // use a key so that we remount when switching builds
-        return React.addons.createFragment({
-          [build[0].id]: <SingleBuild build={build[0]} />
-        });
-      }
+      return <SingleBuild build={build[0]} key={build[0].id} />;
     }
 
     // get all builds for latest code
