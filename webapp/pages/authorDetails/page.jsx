@@ -1,5 +1,4 @@
-import React, {PropTypes} from 'react';
-import _ from 'lodash';
+import React from 'react';
 
 import ChangesLinks from 'display/changes/links';
 import SectionHeader from 'display/section_header';
@@ -15,11 +14,7 @@ import InteractiveData from 'pages/helpers/interactive_data';
 import * as utils from 'utils/utils';
 
 export default React.createClass({
-  propTypes: {
-    author: PropTypes.string
-  },
-
-  componentWillMount: function() {
+  componentWillMount() {
     var author = this.props.params.author || 'me';
 
     this.setState({
@@ -31,13 +26,13 @@ export default React.createClass({
     });
   },
 
-  componentDidMount: function() {
+  componentDidMount() {
     if (!this.state.buildsInteractive.hasRunInitialize()) {
       this.state.buildsInteractive.initialize({});
     }
   },
 
-  render: function() {
+  render() {
     var interactive = this.state.buildsInteractive;
 
     if (interactive.hasNotLoadedInitialData()) {
@@ -48,7 +43,7 @@ export default React.createClass({
 
     var data = data_to_show.getReturnedData().map(build => {
       var target = null;
-      if (_.contains(build.tags, 'arc test')) {
+      if (build.tags.indexOf('arc test') !== -1) {
         target = '';
       } else if (build.source.patch) {
         target = (
@@ -119,7 +114,7 @@ export default React.createClass({
     );
   },
 
-  renderPaging: function(builds) {
+  renderPaging(builds) {
     var links = this.state.buildsInteractive.getPagingLinks();
     return (
       <div className="marginTopM marginBottomM">
