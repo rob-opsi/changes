@@ -169,7 +169,7 @@ var Sidebar = React.createClass({
     );
   },
 
-  noBuildsMarkup: function() {
+  noBuildsMarkup() {
     return (
       <div className="buildsSidebarNoBuilds">
         <i className="fa fa-exclamation-circle" />
@@ -178,20 +178,18 @@ var Sidebar = React.createClass({
     );
   },
 
-  getLatestPerProject: function(builds) {
+  getLatestPerProject(builds) {
     // if its a diff, only get builds from the most recent update that had
     // builds
     builds = buildsForLastCodeChange(builds);
 
     // we want the most recent build for each project
-    return _.values(
-      _.map(_.groupBy(builds, b => b.project.name), projBuilds =>
-        _.last(_.sortBy(projBuilds, b => b.dateCreated))
-      )
+    return Object.values(_.groupBy(builds, b => b.project.name)).map(projBuilds =>
+      _.last(_.sortBy(projBuilds, b => b.dateCreated))
     );
   },
 
-  renderLatestItem: function(builds) {
+  renderLatestItem(builds) {
     var latestPerProj = this.getLatestPerProject(builds);
 
     var subtext = manyBuildsSummaryText(latestPerProj);
@@ -215,7 +213,7 @@ var Sidebar = React.createClass({
     );
   },
 
-  renderBuilds: function(builds, hideNonLatest = false) {
+  renderBuilds(builds, hideNonLatest = false) {
     if (builds === undefined) {
       return null;
     }
@@ -264,7 +262,7 @@ var Sidebar = React.createClass({
   },
 
   // TODO: ok, this should probably be a component or something...
-  renderBuildSideItem: function(
+  renderBuildSideItem(
     condition_dot,
     text,
     time,

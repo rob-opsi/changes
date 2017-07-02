@@ -9,40 +9,37 @@ import * as utils from 'utils/utils';
  * Data structure for the data received from the changes API.
  */
 export const APIResponse = function(endpoint) {
-  return _.create(APIResponsePrototype, {
+  return _.create(Object.prototype, {
     endpoint: endpoint,
     condition: 'loading', // 'loading', 'loaded', or 'error'
-    response: null // this will be the browser's response
+    response: null, // this will be the browser's response
     // object from the ajax call
-  });
-};
+    // for API calls that return json
+    // TODO: this name is terrible. Change it
+    getReturnedData() {
+      return JSON.parse(this.response.responseText);
+    },
 
-var APIResponsePrototype = {
-  // for API calls that return json
-  // TODO: this name is terrible. Change it
-  getReturnedData: function() {
-    return JSON.parse(this.response.responseText);
-  },
+    getStatusCode() {
+      return this.response.status + '';
+    },
 
-  getStatusCode: function() {
-    return this.response.status + '';
-  },
+    // api calls with paging return their links as a response header.
+    getLinksFromHeader() {
+      var header = this.response.getResponseHeader('Link');
+      if (header === null) {
+        return {};
+      }
 
-  // api calls with paging return their links as a response header.
-  getLinksFromHeader: function() {
-    var header = this.response.getResponseHeader('Link');
-    if (header === null) {
-      return {};
+      var links = {};
+      header.split(',').forEach(str => {
+        var match = /<([^>]+)>; rel="([^"]+)"/g.exec(str);
+        links[match[2]] = match[1];
+      });
+
+      return links;
     }
-
-    var links = {};
-    header.split(',').forEach(str => {
-      var match = /<([^>]+)>; rel="([^"]+)"/g.exec(str);
-      links[match[2]] = match[1];
-    });
-
-    return links;
-  }
+  });
 };
 
 /*

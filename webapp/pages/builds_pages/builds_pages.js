@@ -37,24 +37,24 @@ export const DiffPage = React.createClass({
     diff_id: PropTypes.string.isRequired
   },
 
-  getInitialTitle: function() {
+  getInitialTitle() {
     return `${this.props.diff_id}: Builds`;
   },
 
-  getInitialState: function() {
+  getInitialState() {
     return {
       diffBuilds: null
     };
   },
 
-  componentDidMount: function() {
+  componentDidMount() {
     var diff_id = this.props.diff_id;
     api.fetch(this, {
       diffBuilds: `/api/0/phabricator_diffs/${diff_id}/builds`
     });
   },
 
-  render: function() {
+  render() {
     if (!api.isLoaded(this.state.diffBuilds)) {
       return <APINotLoadedPage calls={this.state.diffBuilds} />;
     }
@@ -72,7 +72,14 @@ export const DiffPage = React.createClass({
 
     var builds = _.flatten(diff_data.changes.map(c => c.builds));
 
-    return <BuildsPage type="diff" targetData={diff_data} builds={builds} />;
+    return (
+      <BuildsPage
+        type="diff"
+        targetData={diff_data}
+        builds={builds}
+        params={this.props.params}
+      />
+    );
   }
 });
 
@@ -80,26 +87,20 @@ export const DiffPage = React.createClass({
  * Page that shows the builds associated with a single commit
  */
 export const CommitPage = React.createClass({
-  propTypes: {
-    sourceUUID: PropTypes.string.isRequired
-  },
-
-  getInitialState: function() {
+  getInitialState() {
     return {
       commitBuilds: null,
       source: null
     };
   },
 
-  componentDidMount: function() {
-    var uuid = this.props.sourceUUID;
+  componentDidMount() {
+    var {sourceID} = this.props.params;
 
     // BuildsPage.getContent() below assumes that a selected ID is present in
     // the list, and if the build is missing it crashes the page. Get as many
     // builds as possible up front to minimize the chances of this happening,
     // as a quick workaround.
-    let commit_builds = [];
-
     let fetch_one_page_of_builds = endpoint => {
       api.make_api_ajax_get(
         endpoint,
@@ -107,14 +108,17 @@ export const CommitPage = React.createClass({
         response => {
           let api_response = api.APIResponse(endpoint);
           api_response.response = response;
+          // TODO(dcramer): for some reason this isn't being coerced into an array
           let new_items = api_response.getReturnedData();
-          commit_builds = commit_builds.concat(new_items);
-
           let new_endpoint = api_response.getLinksFromHeader();
           if ('next' in new_endpoint) {
             fetch_one_page_of_builds(new_endpoint.next);
           } else {
-            this.setState({commitBuilds: commit_builds});
+            this.setState(state => {
+              return {
+                commitBuilds: [...(state.commitBuilds || []), ...new_items]
+              };
+            });
           }
         },
         error => {
@@ -124,14 +128,14 @@ export const CommitPage = React.createClass({
     };
 
     // 100 is max page size.
-    let endpoint = `/api/0/sources_builds/?source_id=${uuid}&per_page=100`;
+    let endpoint = `/api/0/sources_builds/?source_id=${sourceID}&per_page=100`;
     fetch_one_page_of_builds(endpoint);
     api.fetch(this, {
-      source: `/api/0/sources/${uuid}`
+      source: `/api/0/sources/${sourceID}`
     });
   },
 
-  render: function() {
+  render() {
     // special-case source API errors...it might be because the commit contains unicode
     if (api.isError(this.state.source)) {
       if (this.state.commitBuilds === null) {
@@ -188,6 +192,7 @@ export const CommitPage = React.createClass({
         type="commit"
         targetData={this.state.source.getReturnedData()}
         builds={this.state.commitBuilds}
+        params={this.props.params}
       />
     );
   }
@@ -211,18 +216,17 @@ const BuildsPage = React.createClass({
   },
 
   getInitialState() {
-    var query_params = URI(window.location.href).search(true);
-
     return {
       activeBuildID: this.props.params.buildID,
       tests: {} // fetched on demand
     };
   },
 
-  render() {
-    // TODO(dcramer): this should be componentWillReceiptProps
+  componentWillReceiveProps(nextProps) {
     this.updateWindowUrl();
+  },
 
+  render() {
     // TODO: cleanup!
     return (
       <ChangesPage bodyPadding={false} fixed={true}>

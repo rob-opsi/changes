@@ -89,7 +89,7 @@ export const SingleBuild = React.createClass({
     // get job phases
     var job_ids = build_prop.jobs.map(j => j.id);
 
-    let phasesCalls = _.values(_.pick(this.state.jobPhases, job_ids));
+    let phasesCalls = Object.values(_.pick(this.state.jobPhases, job_ids));
 
     let calls = phasesCalls.concat([
       this.state.buildDetails,
@@ -888,7 +888,7 @@ export const LatestBuildsSummary = React.createClass({
   propTypes: {
     // All builds for the commit or the latest update to a diff. We'll grab
     // the latest build per project
-    builds: PropTypes.object.isRequired,
+    builds: PropTypes.array.isRequired,
     // are we rendering for a diff or a commit
     type: PropTypes.oneOf(['diff', 'commit']).isRequired,
     // info about the commit (a changes source object) or diff (from phab.)
@@ -903,11 +903,9 @@ export const LatestBuildsSummary = React.createClass({
     // a common helper function
 
     // we want the most recent build for each project
-    var latestByProj = _.values(
-      _.map(_.groupBy(builds, b => b.project.name), proj_builds =>
-        _.last(_.sortBy(proj_builds, b => b.dateCreated))
-      )
-    );
+    var latestByProj = Object.values(
+      _.groupBy(builds, b => b.project.name)
+    ).map(projBuilds => _.last(_.sortBy(projBuilds, b => b.dateCreated)));
 
     builds = latestByProj.map((b, index) => {
       return (

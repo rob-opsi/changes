@@ -1,4 +1,5 @@
 import React, {PropTypes} from 'react';
+import {Link} from 'react-router';
 import _ from 'lodash';
 
 import APINotLoaded from 'display/not_loaded';
@@ -95,9 +96,9 @@ var BuildsTab = React.createClass({
 
       return new GridRow(build.id, [
         <SingleBuildStatus build={build} parentElem={this} />,
-        <a className="subtle" href={ChangesLinks.buildHref(build)}>
+        <Link className="subtle" to={ChangesLinks.buildHref(build)}>
           {build.name}
-        </a>,
+        </Link>,
         duration,
         tests,
         target,

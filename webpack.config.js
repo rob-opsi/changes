@@ -3,6 +3,7 @@
 var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+var IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 module.exports = {
   entry: {
@@ -48,5 +49,5 @@ module.exports = {
     path: path.resolve('webapp/dist'),
     filename: '[name].bundle.js'
   },
-  devtool: 'source-map'
+  devtool: IS_PRODUCTION ? '#source-map' : '#cheap-source-map'
 };

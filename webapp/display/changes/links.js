@@ -76,15 +76,13 @@ var ChangesLinks = {
     // from arc test)
 
     if (!build.source.patch) {
-      return URI(`/commit_source/${build.source.id}/`)
-        .search({buildID: build.id})
-        .toString();
+      return `/sources/${build.source.id}/builds/${build.id}`;
     } else if (build.source.patch && build.source.data['phabricator.revisionID']) {
       return URI(`/diff/D${build.source.data['phabricator.revisionID']}`)
         .search({buildID: build.id})
         .toString();
     } else {
-      return URI(`/builds/${build.id}`);
+      return `/builds/${build.id}`;
     }
   },
 

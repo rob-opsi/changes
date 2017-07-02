@@ -127,8 +127,9 @@ export const convert_status_and_result_to_condition = function(statusId, resultI
  * condition: if any failed or haven't finished, returns failed/waiting, etc.
  */
 export const get_runnables_summary_condition = function(runnables) {
+  console.log(runnables);
   var any_condition = condition =>
-    _.any(runnables, r => get_runnable_condition(r) === condition);
+    !!runnables.find(r => get_runnable_condition(r) === condition);
 
   // I picked what I thought was a reasonable order here
   var any_aborted = any_condition(COND_FAILED_ABORTED);
@@ -255,7 +256,7 @@ export const ConditionDot = React.createClass({
         fontSize: font_sizes[this.props.size]
       };
       if (this.props.size === 'medium') {
-        style = _.extend(style, {marginLeft: 2, marginRight: 6});
+        style = {...style, marginLeft: 2, marginRight: 6};
       }
 
       var className = get_runnable_condition_icon_classname(condition);

@@ -8,7 +8,7 @@ import AdminProjectDetailsPage from '../admin/pages/projectDetails/page';
 import AdminRepoDetailsPage from '../admin/pages/repoDetails/page';
 
 import AuthorDetailsPage from '../pages/authorDetails/page';
-import {SingleBuildPage} from '../pages/builds_pages/builds_pages';
+import {CommitPage, SingleBuildPage} from '../pages/builds_pages/builds_pages';
 import HomePage from '../pages/home/page';
 import ProjectDetailsPage from '../pages/projectDetails/page';
 import ProjectListPage from '../pages/projectList/page';
@@ -20,6 +20,8 @@ export default (
     <Route path="projects/:projectSlug" component={ProjectDetailsPage} />
     <Route path="authors/:email" component={AuthorDetailsPage} />
     <Route path="builds/:buildID" component={SingleBuildPage} />
+    <Route path="sources/:sourceID" component={CommitPage} />
+    <Route path="sources/:sourceID/builds/:buildID" component={CommitPage} />
 
     <Route path="admin" component={AdminHomePage} />
     <Route path="admin/projects/:projectSlug" component={AdminProjectDetailsPage} />
