@@ -53,7 +53,7 @@
     "redux": "^3.7.1",
     "urijs": "^1.18.10",
     "webpack": "^3.0.0",
-    "webpack-dev-server": "^2.5.0"
+    "webpack-dev-server": "^3.1.2"
   },
   "private": true,
   "devDependencies": {
